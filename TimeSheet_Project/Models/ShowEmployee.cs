@@ -14,6 +14,8 @@
         public string UPDATED_DATE { get;set; }
         public byte IS_ACTIVE { get; set; }
         public int LINE_MANAGER_ID { get; set; }
+       public string LINE_MANAGER_EMAIL_ID { get; set; }
+        public DateTime EMP_LAST_LOGIN { get; set; }
        
     }
 }
