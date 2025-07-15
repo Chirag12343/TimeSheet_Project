@@ -74,7 +74,7 @@ namespace TimeSheet_Project.Controllers
             List<Projects> projects = new List<Projects>();
             SqlConnection conn = new SqlConnection(_connection);
             conn.Open();
-            SqlCommand cmd = new SqlCommand("SP_GetAllProjects", conn);
+            SqlCommand cmd = new SqlCommand("SP_GetAllProjectnames", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             SqlDataReader read = cmd.ExecuteReader();
             while (read.Read())
@@ -95,7 +95,7 @@ namespace TimeSheet_Project.Controllers
           List<GetAllModules> getAllModules = new List<GetAllModules>();
             SqlConnection conn = new SqlConnection(_connection);
             conn.Open();
-            SqlCommand cmd = new SqlCommand("SP_GetAllModules",conn);
+            SqlCommand cmd = new SqlCommand("SP_GetAllModulenames", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@Function_Name", functionname);
             SqlDataReader read = cmd.ExecuteReader();

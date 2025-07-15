@@ -1,26 +1,22 @@
-﻿using System.Data.SqlTypes;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Data;
-
-namespace TimeSheet_Project.Models
+﻿namespace TimeSheet_Project.Models
 {
-    //public class TBL_EMPLOYEE : ITBL_EMPLOYEE
-    //{
-    //    private readonly string  _connection;
-    //    private readonly IConfiguration _config;
-    //    public TBL_EMPLOYEE(IConfiguration configuration) 
-    //    {
-    //        _config = configuration;
-    //        //_connection = _config.GetConnectionString("conn");
-    //        _connection = "Data Source=DESKTOP-IUGKD3M;Initial Catalog=DB_TIMESHEET;Integrated Security=True;TrustServerCertificate=True";
+    public class TBL_EMPLOYEE
+    {
+        public int EMP_ID { get; set; }
+        public string ROLE_NAME { get; set; }
+        public string EMP_CODE { get; set; }
+        public string EMP_NAME { get; set; }
+        public long EMP_MOBILE_NO { get; set; }
+        public string EMP_EMAIL_ID { get; set; }
+        public string EMP_PASSWORD { get; set; }
+        public string CREATED_BY { get; set; }
+        public DateTime CREATED_DATE { get; set; }
+        public string? UPDATED_BY { get; set; }
+        public DateTime? UPDATED_DATE { get; set; }
+        public byte IS_ACTIVE { get; set; }
+        public int? LINE_MANAGER_ID { get; set; }
+        public string? LINE_MANAGER_EMAIL_ID { get; set; }
+        public DateTime? EMP_LAST_LOGIN { get; set; }
 
-    //    }
-       
-    //    public List<Function> Login(LoginDetails emp_details)
-    //    {
-           
-    //    }
-    //}
+    }
 }
