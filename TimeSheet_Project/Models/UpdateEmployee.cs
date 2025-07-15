@@ -1,10 +1,10 @@
 ﻿namespace TimeSheet_Project.Models
 {
-    public class TBL_EMPLOYEE
+    public class UpdateEmployee
     {
         public int EMP_ID { get; set; }
-        public string ROLE_NAME { get; set; }
-       // public int  ROLE_ID { get; set; }
+       
+        public int ROLE_ID { get; set; }
         public string EMP_CODE { get; set; }
         public string EMP_NAME { get; set; }
         public long EMP_MOBILE_NO { get; set; }
@@ -18,6 +18,5 @@
         public int? LINE_MANAGER_ID { get; set; }
         public string? LINE_MANAGER_EMAIL_ID { get; set; }
         public DateTime? EMP_LAST_LOGIN { get; set; }
-
     }
 }

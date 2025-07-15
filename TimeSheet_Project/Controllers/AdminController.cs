@@ -322,7 +322,7 @@ namespace TimeSheet_Project.Controllers
 
         [HttpPut]
         [Route("UPDATE_EMPLOYEE")]
-        public IActionResult UpdateEmployee(TBL_EMPLOYEE EMPLOYEE)
+        public IActionResult UpdateEmployee(UpdateEmployee EMPLOYEE)
         {
             using (SqlConnection conn = new SqlConnection(connection))
             {
@@ -333,7 +333,7 @@ namespace TimeSheet_Project.Controllers
                     cmd.CommandType = CommandType.StoredProcedure;  // ✅ REQUIRED
 
                     cmd.Parameters.AddWithValue("@EMP_ID", EMPLOYEE.EMP_ID);
-                    cmd.Parameters.AddWithValue("@ROLE_NAME", EMPLOYEE.ROLE_NAME);
+                    cmd.Parameters.AddWithValue("@ROLE_ID", EMPLOYEE.ROLE_ID);
                     cmd.Parameters.AddWithValue("@EMP_CODE", EMPLOYEE.EMP_CODE);
                     cmd.Parameters.AddWithValue("@EMP_NAME", EMPLOYEE.EMP_NAME);
                     cmd.Parameters.AddWithValue("@EMP_MOBILE_NO", EMPLOYEE.EMP_MOBILE_NO);
@@ -391,7 +391,7 @@ namespace TimeSheet_Project.Controllers
         }
         [HttpPut]
         [Route("UPDATE_PROJECT")]
-        public IActionResult UpdateProject(TBL_PROJECTS project)
+        public IActionResult UpdateProject(UpdateProject project)
         {
             SqlConnection conn = new SqlConnection(connection);
 
@@ -401,7 +401,7 @@ namespace TimeSheet_Project.Controllers
                 SqlCommand cmd = new SqlCommand("SP_UpdateProject", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@PROJ_ID", project.PROJ_ID);
-                cmd.Parameters.AddWithValue("@CLIENT_NAME", project.PROJ_NAME);
+                cmd.Parameters.AddWithValue("@CLIENT_ID", project.CLIENT_ID);
                 cmd.Parameters.AddWithValue("@PROJ_CODE", project.PROJ_CODE);
                 cmd.Parameters.AddWithValue("@PROJ_NAME", project.PROJ_NAME);
                 cmd.Parameters.AddWithValue("@PROJ_DESC", project.PROJ_DESC);
@@ -422,7 +422,7 @@ namespace TimeSheet_Project.Controllers
         }
         [HttpPut]
         [Route("UPDATE_FUNCTIONS")]
-        public IActionResult UpdateProject(TBL_FUNCTION function)
+        public IActionResult UpdateProject(UpdateFunction function)
         {
             using (SqlConnection conn = new SqlConnection(connection))
             {
@@ -432,7 +432,7 @@ namespace TimeSheet_Project.Controllers
                     SqlCommand cmd = new SqlCommand("SP_UpdateFunction", conn);
                     cmd.CommandType = CommandType.StoredProcedure;  // ✅ REQUIRED
                     cmd.Parameters.AddWithValue("@FUN_ID", function.FUN_ID);
-                    cmd.Parameters.AddWithValue("@ROLE_NAME", function.ROLE_NAME);
+                    cmd.Parameters.AddWithValue("@ROLE_ID", function.ROLE_ID);
                     cmd.Parameters.AddWithValue("@FUN_CODE", function.FUN_CODE);
                     cmd.Parameters.AddWithValue("@FUN_NAME", function.FUN_NAME);
                     cmd.Parameters.AddWithValue("@CREATED_BY", function.CREATED_BY);
@@ -453,7 +453,7 @@ namespace TimeSheet_Project.Controllers
 
         [HttpPut]
         [Route("UPDATE_MODULES")]
-        public IActionResult UpdateModule(TBL_MODULE module)
+        public IActionResult UpdateModule(UpdateModule module)
         {
             using (SqlConnection conn = new SqlConnection(connection))
             {
@@ -464,9 +464,9 @@ namespace TimeSheet_Project.Controllers
                     SqlCommand cmd = new SqlCommand("SP_UpdateModule", conn);
                     cmd.CommandType = CommandType.StoredProcedure;  // ✅ REQUIRED
                     cmd.Parameters.AddWithValue("@MOD_ID", module.MOD_ID);
-                    cmd.Parameters.AddWithValue("@FUN_NAME", module.FUN_NAME);
+                    cmd.Parameters.AddWithValue("@FUN_ID", module.FUN_ID);
                     cmd.Parameters.AddWithValue("@MOD_CODE", module.MOD_CODE);
-                    cmd.Parameters.AddWithValue("@MOD_NAME", module.FUN_NAME);
+                   // cmd.Parameters.AddWithValue("@MOD_NAME", module.FUN_NAME);
                     cmd.Parameters.AddWithValue("@CREATED_BY", module.CREATED_BY);
                     cmd.Parameters.AddWithValue("@CREATED_DATE", module.CREATED_DATE);
                     cmd.Parameters.AddWithValue("@UPDATED_BY", module.UPDATED_BY);
