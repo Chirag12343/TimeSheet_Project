@@ -627,5 +627,131 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest(e.Message);
             }
         }
+        [HttpDelete]
+        [Route("DeleteRole")]
+        public IActionResult DeleteRole(int role_id)
+        {
+          SqlConnection conn=new SqlConnection(connection);
+            conn.Open();
+            try
+            {
+                SqlCommand sqlCommand = new SqlCommand("SP_DeleteRole", conn);
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("@ROLE_ID", role_id);
+                sqlCommand.ExecuteNonQuery();    
+                return Ok("Role Deleted SuccessFully.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("SomeThing Wrong Please Try Again..");
+            }
+        }
+        [HttpDelete]
+        [Route("DeleteEmployee")]
+        public IActionResult DeleteEmployee(int EmployeeID)
+        {
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            try
+            {
+                SqlCommand sqlCommand = new SqlCommand("SP_DeleteEmployee", conn);
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("@EMP_ID",EmployeeID);
+                sqlCommand.ExecuteNonQuery();
+                return Ok("Employee Deleted SuccessFully.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("SomeThing Wrong Please Try Again..");
+            }
+
+        }
+        [HttpDelete]
+        [Route("DeleteClient")]
+        public IActionResult DeleteClient(int ClientId)
+        {
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            try
+            {
+                SqlCommand sqlCommand = new SqlCommand("SP_DeleteClient", conn);
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("@CLIENT_ID", ClientId);
+                sqlCommand.ExecuteNonQuery();
+                return Ok("Client Deleted SuccessFully.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("SomeThing Wrong Please Try Again..");
+            }
+
+        }
+
+        [HttpDelete]
+        [Route("DeleteProject")]
+        public IActionResult DeleteProject(int ProjectId)
+        {
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            try
+            {
+                SqlCommand sqlCommand = new SqlCommand("SP_DeleteProject", conn);
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("@PROJ_ID", ProjectId);
+                sqlCommand.ExecuteNonQuery();
+                return Ok("Project Deleted SuccessFully.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("SomeThing Wrong Please Try Again..");
+            }
+
+        }
+        [HttpDelete]
+        [Route("DeleteFunction")]
+        public IActionResult DeleteFunction(int FunctionId)
+        {
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            try
+            {
+                SqlCommand sqlCommand = new SqlCommand("SP_DeleteFunction", conn);
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("@FUN_ID", FunctionId);
+                sqlCommand.ExecuteNonQuery();
+                return Ok("Function Deleted SuccessFully.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("SomeThing Wrong Please Try Again..");
+            }
+
+        }
+        [HttpDelete]
+        [Route("DeleteModule")]
+        public IActionResult DeleteModule(int ModuleId)
+        {
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            try
+            {
+                SqlCommand sqlCommand = new SqlCommand("SP_DeleteModule", conn);
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("@MOD_ID", ModuleId);
+                sqlCommand.ExecuteNonQuery();
+                return Ok("Module Deleted SuccessFully.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("SomeThing Wrong Please Try Again..");
+            }
+
+        }
     }
 }
