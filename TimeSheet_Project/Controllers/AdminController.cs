@@ -543,7 +543,58 @@ namespace TimeSheet_Project.Controllers
                
            
                 cmd.ExecuteNonQuery();
-                return Ok("EMPLOYEE Added Successfully.");
+                return Ok("Client Added Successfully.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("INSERT-PROJECT")]
+        public IActionResult AddProject(ProjectDetails PROJECT)
+        {
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            try
+            {
+                SqlCommand cmd = new SqlCommand("SP_InsertProject", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@CLIENT_ID", PROJECT.CLIENT_ID);
+                cmd.Parameters.AddWithValue("@PROJ_CODE", PROJECT.PROJ_CODE);
+                cmd.Parameters.AddWithValue("@PROJ_NAME", PROJECT.PROJ_NAME);
+                cmd.Parameters.AddWithValue("@PROJ_DESC", PROJECT.PROJ_DESCRIPTION);
+
+
+                cmd.ExecuteNonQuery();
+                return Ok("Project Added Successfully.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest(e.Message);
+            }
+        }
+        [HttpPost]
+        [Route("INSERT-FUNCTION")]
+        public IActionResult AddFunction(ProjectDetails PROJECT)
+        {
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            try
+            {
+                SqlCommand cmd = new SqlCommand("SP_InsertProject", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@CLIENT_ID", PROJECT.CLIENT_ID);
+                cmd.Parameters.AddWithValue("@PROJ_CODE", PROJECT.PROJ_CODE);
+                cmd.Parameters.AddWithValue("@PROJ_NAME", PROJECT.PROJ_NAME);
+                cmd.Parameters.AddWithValue("@PROJ_DESC", PROJECT.PROJ_DESCRIPTION);
+
+
+                cmd.ExecuteNonQuery();
+                return Ok("Project Added Successfully.");
             }
             catch (Exception e)
             {
