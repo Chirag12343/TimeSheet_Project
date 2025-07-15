@@ -579,22 +579,47 @@ namespace TimeSheet_Project.Controllers
         }
         [HttpPost]
         [Route("INSERT-FUNCTION")]
-        public IActionResult AddFunction(ProjectDetails PROJECT)
+        public IActionResult AddFunction(FunctionDetails FUNCTION)
         {
             SqlConnection conn = new SqlConnection(connection);
             conn.Open();
             try
             {
-                SqlCommand cmd = new SqlCommand("SP_InsertProject", conn);
+                SqlCommand cmd = new SqlCommand("SP_InsertFunction", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@CLIENT_ID", PROJECT.CLIENT_ID);
-                cmd.Parameters.AddWithValue("@PROJ_CODE", PROJECT.PROJ_CODE);
-                cmd.Parameters.AddWithValue("@PROJ_NAME", PROJECT.PROJ_NAME);
-                cmd.Parameters.AddWithValue("@PROJ_DESC", PROJECT.PROJ_DESCRIPTION);
+                cmd.Parameters.AddWithValue("@ROLE_ID", FUNCTION.ROLE_ID);
+                cmd.Parameters.AddWithValue("@FUN_CODE", FUNCTION.FUN_CODE);
+                cmd.Parameters.AddWithValue("@FUN_NAME", FUNCTION.FUN_NAME);
+            
 
 
                 cmd.ExecuteNonQuery();
-                return Ok("Project Added Successfully.");
+                return Ok("Function Added Successfully.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest(e.Message);
+            }
+        }
+        [HttpPost]
+        [Route("INSERT-MODULES")]
+        public IActionResult AddModules(ModulesDetails Module)
+        {
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            try
+            {
+                SqlCommand cmd = new SqlCommand("SP_InsertModule", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@FUN_ID", Module.FUN_ID);
+                cmd.Parameters.AddWithValue("@MOD_CODE", Module.MOD_CODE);
+                cmd.Parameters.AddWithValue("@MOD_NAME", Module.MOD_NAME);
+
+
+
+                cmd.ExecuteNonQuery();
+                return Ok("Module  Added Successfully.");
             }
             catch (Exception e)
             {
