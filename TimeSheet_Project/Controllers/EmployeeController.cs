@@ -85,24 +85,22 @@ namespace TimeSheet_Project.Controllers
                     while (reader.Read())
                     {
                         Function function = new Function();
+
                         function.Functions = reader["FUN_NAME"].ToString();
+                    function.FUN_ID = Convert.ToInt32(reader["FUN_ID"]);
                     ROLE = reader["ROLE_NAME"].ToString().ToUpper();
                         functions.Add(function);
                     }
 
-                    // Generate a session ID
+             
                     var sessionId = Guid.NewGuid().ToString();
 
-                    // Store the session ID in cache (with an expiration of 1 hour)
+        
                     _cache.Set(sessionId, details.Email, TimeSpan.FromHours(1));
 
                     // Return the session ID along with functions
                     return Ok(new { SessionId = sessionId, Functions = functions,ROLE_NAME= ROLE });
-                //}
-                //else
-                //{
-                //    return Unauthorized("Invalid credentials");
-                //}
+           
             }
             catch (Exception ex)
             {
@@ -133,6 +131,7 @@ namespace TimeSheet_Project.Controllers
             while (read.Read())
             {
                 Projects project = new Projects();
+                project.PROJ_ID = Convert.ToInt32(read["PROJ_ID"]);
                 project.Client_code = read["CLIENT_CODE"].ToString();
                 project.Proj_name = read["PROJ_NAME"].ToString();
                 projects.Add(project);
@@ -155,6 +154,7 @@ namespace TimeSheet_Project.Controllers
             while (read.Read()) 
             {
              GetAllModules module=new GetAllModules();
+                module.MOD_ID = Convert.ToInt32(read["MOD_ID"]);
                 module.Module = read["MOD_NAME"].ToString();
                 getAllModules.Add(module);
             }

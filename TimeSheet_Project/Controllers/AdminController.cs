@@ -835,8 +835,23 @@ namespace TimeSheet_Project.Controllers
             return Ok(functions);
         }
 
-        //[HttpPost]
-        //[Route("TimeSlot_insert")]
-        //public IActionResult
+        [HttpGet]
+        [Route("Get_All_SlotDetails")]
+        public IActionResult Getallfunctionsall()
+        {
+            List< TimeSloatdetails > timesdetails=new List<TimeSloatdetails>();
+            SqlConnection conn = new SqlConnection(connection); 
+            conn.Open();
+            SqlCommand cmd = new SqlCommand("SP_GetSlot",conn);
+           SqlDataReader read= cmd.ExecuteReader();
+            while (read.Read())
+            { 
+            TimeSloatdetails slotdata=new TimeSloatdetails();
+                slotdata.SLOT_ID = Convert.ToInt32(read["SLOT_ID"]);
+               slotdata.SLOT_NAME=read["TIMESLOT"].ToString();
+                timesdetails.Add(slotdata);
+            }
+            return Ok(timesdetails);
+        }
     }
 }
