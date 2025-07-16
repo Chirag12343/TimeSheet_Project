@@ -1,4 +1,3 @@
-
 using TimeSheet_Project.Models;
 
 namespace TimeSheet_Project
@@ -12,7 +11,6 @@ namespace TimeSheet_Project
             // Add services to the container.
             
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             //builder.Services.AddScoped<ITBL_EMPLOYEE, TBL_EMPLOYEE>();
@@ -25,11 +23,17 @@ namespace TimeSheet_Project
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            
+
             app.UseHttpsRedirection();
 
+            app.UseRouting();
+
+            app.UseCors("AllowReactApp");
+
             app.UseAuthorization();
-            
+
+            app.UseSession();
+
             app.MapControllers();
 
             app.Run();

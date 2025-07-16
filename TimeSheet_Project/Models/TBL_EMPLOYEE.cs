@@ -1,4 +1,6 @@
-﻿namespace TimeSheet_Project.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TimeSheet_Project.Models
 {
     public class TBL_EMPLOYEE
     {
@@ -19,5 +21,15 @@
         public string? LINE_MANAGER_EMAIL_ID { get; set; }
         public DateTime? EMP_LAST_LOGIN { get; set; }
 
+    }
+
+
+
+    public class Login
+    {
+        [Required]
+        public string email { get; set; }
+        [Required]
+        public string password { get; set; }
     }
 }

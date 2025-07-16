@@ -159,5 +159,33 @@ namespace TimeSheet_Project.Controllers
             return Ok(getAllModules);
 
         }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] Login model)
+        {
+            using (SqlConnection con = new SqlConnection(_connection))
+            {
+                con.Open();
+
+
+                // Check User table
+                SqlCommand cmd = new SqlCommand("Sp_loginUsers", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Clear();
+                cmd.Parameters.AddWithValue("@Email", model.email);
+                cmd.Parameters.AddWithValue("@Password", model.password);
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    // User found
+                    return Ok(new { status = "success", userType = "user", userId = reader.GetInt32(0) });
+
+
+                }
+
+                return Unauthorized(new { status = "failed", message = "Invalid email or password" });
+            }
+        }
     }
 }
