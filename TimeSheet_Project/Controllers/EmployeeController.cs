@@ -68,6 +68,8 @@ namespace TimeSheet_Project.Controllers
             SqlConnection con = new SqlConnection(_connection);
             con.Open();
             var ROLE = "";
+            var Emp_name = "";
+            var Emp_Id = 0;
             try
             {
                 // Execute the stored procedure to validate user
@@ -88,8 +90,11 @@ namespace TimeSheet_Project.Controllers
 
                         function.Functions = reader["FUN_NAME"].ToString();
                     function.FUN_ID = Convert.ToInt32(reader["FUN_ID"]);
-                    ROLE = reader["ROLE_NAME"].ToString().ToUpper();
-                        functions.Add(function);
+                     ROLE = reader["ROLE_NAME"].ToString().ToUpper();
+                    Emp_name = reader["EMP_NAME"].ToString();
+                    Emp_Id = Convert.ToInt32(reader["EMP_ID"]);
+
+                    functions.Add(function);
                     }
 
              
@@ -99,7 +104,7 @@ namespace TimeSheet_Project.Controllers
                     _cache.Set(sessionId, details.Email, TimeSpan.FromHours(1));
 
                     // Return the session ID along with functions
-                    return Ok(new { SessionId = sessionId, Functions = functions,ROLE_NAME= ROLE });
+                    return Ok(new { SessionId = sessionId, Functions = functions ,EMP_ID=Emp_Id,EMP_NAME=Emp_name,EMP_ROLE=ROLE});
            
             }
             catch (Exception ex)
