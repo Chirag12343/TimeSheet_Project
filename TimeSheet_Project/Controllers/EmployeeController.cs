@@ -67,11 +67,12 @@ namespace TimeSheet_Project.Controllers
             List<Function> functions = new List<Function>();
             SqlConnection con = new SqlConnection(_connection);
             con.Open();
-
+            var ROLE = "";
             try
             {
                 // Execute the stored procedure to validate user
-                SqlCommand cmd = new SqlCommand("SP_GetFunctions", con);
+               // SqlCommand cmd = new SqlCommand("SP_GetFunctions", con);
+                SqlCommand cmd = new SqlCommand("SP_DEMO", con);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@Email", details.Email);
                 cmd.Parameters.AddWithValue("@PassWord", details.Password);
@@ -79,12 +80,13 @@ namespace TimeSheet_Project.Controllers
                 SqlDataReader reader = cmd.ExecuteReader();
 
                 // If user is valid, proceed with fetching functions
-                if (reader.HasRows)
-                {
+                //if (reader.HasRows)
+                //{
                     while (reader.Read())
                     {
                         Function function = new Function();
                         function.Functions = reader["FUN_NAME"].ToString();
+                    ROLE = reader["ROLE_NAME"].ToString().ToUpper();
                         functions.Add(function);
                     }
 
@@ -95,16 +97,17 @@ namespace TimeSheet_Project.Controllers
                     _cache.Set(sessionId, details.Email, TimeSpan.FromHours(1));
 
                     // Return the session ID along with functions
-                    return Ok(new { SessionId = sessionId, Functions = functions });
-                }
-                else
-                {
-                    return Unauthorized("Invalid credentials");
-                }
+                    return Ok(new { SessionId = sessionId, Functions = functions,ROLE_NAME= ROLE });
+                //}
+                //else
+                //{
+                //    return Unauthorized("Invalid credentials");
+                //}
             }
             catch (Exception ex)
             {
                 // Handle error and log exception if needed
+                Console.WriteLine(ex);
                 return StatusCode(500, "An error occurred: " + ex.Message);
             }
             finally
@@ -117,7 +120,7 @@ namespace TimeSheet_Project.Controllers
 
 
 
-        [HttpPost]
+        [HttpGet]
         [Route("Get_Projects")]
         public IActionResult GetAllProjects()
         {
@@ -138,7 +141,7 @@ namespace TimeSheet_Project.Controllers
             conn.Close();
             return Ok(projects);
         }
-        [HttpPost]
+        [HttpGet]
         [Route("Get-All_Modules")]
         public IActionResult GetAllModules(string functionname)
         { 
@@ -160,32 +163,6 @@ namespace TimeSheet_Project.Controllers
 
         }
 
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] Login model)
-        {
-            using (SqlConnection con = new SqlConnection(_connection))
-            {
-                con.Open();
-
-
-                // Check User table
-                SqlCommand cmd = new SqlCommand("Sp_loginUsers", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Clear();
-                cmd.Parameters.AddWithValue("@Email", model.email);
-                cmd.Parameters.AddWithValue("@Password", model.password);
-                SqlDataReader reader = cmd.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    // User found
-                    return Ok(new { status = "success", userType = "user", userId = reader.GetInt32(0) });
-
-
-                }
-
-                return Unauthorized(new { status = "failed", message = "Invalid email or password" });
-            }
-        }
+       
     }
 }

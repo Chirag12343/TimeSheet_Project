@@ -753,15 +753,90 @@ namespace TimeSheet_Project.Controllers
             }
 
         }
-
+        [HttpGet]
+        [Route("get_roles")]
         public IActionResult GetRoles()
         {
-            SqlConnection conn = new SqlConnection();
+            List<GetRoles> roles = new List<GetRoles>();    
+            SqlConnection conn = new SqlConnection(connection);
             conn.Open();
-            SqlCommand cmd = new SqlCommand("",conn);
+            SqlCommand cmd = new SqlCommand("SP_GETROLES", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-
-            return Ok();
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read()) 
+            {
+                GetRoles role = new GetRoles();
+                role.ROLE_ID = Convert.ToInt32(reader["ROLE_ID"]);
+                role.ROLE_NAME = reader["ROLE_NAME"].ToString();
+                roles.Add(role);
+            
+            }
+            return Ok(roles);
         }
+        [HttpGet]
+        [Route("get_clients")]
+        public IActionResult GetClients()
+        {
+            List<GETALLCLIENTS> CLIENTS = new List<GETALLCLIENTS>();
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            SqlCommand cmd = new SqlCommand("SP_GETCLIENTS", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                GETALLCLIENTS CLIENT = new GETALLCLIENTS();
+                CLIENT.CLIENT_ID = Convert.ToInt32(reader["CLIENT_ID"]);
+                CLIENT.CLIENT_NAME = reader["CLIENT_NAME"].ToString();
+                CLIENTS.Add(CLIENT);
+
+            }
+            return Ok(CLIENTS);
+        }
+        //[HttpGet]
+        //[Route("get_roles")]
+        //public IActionResult GetallRoles()
+        //{
+        //    List<GETALLROLES> roles = new List<GETALLROLES>();
+        //    SqlConnection conn = new SqlConnection(connection);
+        //    conn.Open();
+        //    SqlCommand cmd = new SqlCommand("SP_GETALLROLE", conn);
+        //    cmd.CommandType = CommandType.StoredProcedure;
+        //    SqlDataReader reader = cmd.ExecuteReader();
+        //    while (reader.Read())
+        //    {
+        //        GETALLROLES role = new GETALLROLES();
+        //        role.ROLE_ID = Convert.ToInt32(reader["ROLE_ID"]);
+        //        role.ROLE_NAME = reader["ROLE_NAME"].ToString();
+        //        roles.Add(role);
+
+        //    }
+        //    return Ok(roles);
+        //}
+
+        [HttpGet]
+        [Route("get_function")]
+        public IActionResult Getallfunctions()
+        {
+            List<GetAllFunctions> functions = new List<GetAllFunctions>();
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            SqlCommand cmd = new SqlCommand("SP_GETALLFUNCTIONS", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                GetAllFunctions function = new GetAllFunctions();
+                function.FUN_ID = Convert.ToInt32(reader["FUN_ID"]);
+                function.FUN_NAME = reader["FUN_NAME"].ToString();
+                functions.Add(function);
+
+            }
+            return Ok(functions);
+        }
+
+        //[HttpPost]
+        //[Route("TimeSlot_insert")]
+        //public IActionResult
     }
 }

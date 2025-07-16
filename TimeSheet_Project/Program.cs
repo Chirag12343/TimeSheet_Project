@@ -15,6 +15,28 @@ namespace TimeSheet_Project
             builder.Services.AddSwaggerGen();
             //builder.Services.AddScoped<ITBL_EMPLOYEE, TBL_EMPLOYEE>();
             builder.Services.AddMemoryCache();
+
+
+            // ? Add distributed memory cache
+            builder.Services.AddDistributedMemoryCache();
+
+            // ? Add session
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularClient",
+                    policy => policy
+                        .WithOrigins("http://localhost:4200")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowAnyOrigin()
+                );
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -28,12 +50,12 @@ namespace TimeSheet_Project
 
             app.UseRouting();
 
-            app.UseCors("AllowReactApp");
+           // app.UseCors("AllowReactApp");
 
             app.UseAuthorization();
 
             app.UseSession();
-
+            app.UseCors("AllowAngularClient");
             app.MapControllers();
 
             app.Run();
