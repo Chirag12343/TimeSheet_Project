@@ -753,5 +753,15 @@ namespace TimeSheet_Project.Controllers
             }
 
         }
+
+        public IActionResult GetRoles()
+        {
+            SqlConnection conn = new SqlConnection();
+            conn.Open();
+            SqlCommand cmd = new SqlCommand("",conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            return Ok();
+        }
     }
 }

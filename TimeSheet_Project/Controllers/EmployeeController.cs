@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Caching.Memory;
 using TimeSheet_Project.Models;
 
 namespace TimeSheet_Project.Controllers
@@ -10,16 +11,55 @@ namespace TimeSheet_Project.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-
+        private readonly IMemoryCache _cache;
         private readonly string _connection;
-        public EmployeeController(IConfiguration config)
+        public EmployeeController(IConfiguration config,IMemoryCache cache)
         {
 
             _connection = config.GetConnectionString("conn");
+            _cache = cache;
 
         }
 
 
+        //[HttpPost]
+        //[Route("TimeSheet_Login")]
+        //public IActionResult Login(LoginDetails details)
+        //{
+        //    List<Function> functions = new List<Function>();
+        //    SqlConnection con = new SqlConnection(_connection);
+        //    con.Open();
+        //    try
+        //    {
+
+        //        SqlCommand cmd = new SqlCommand("SP_GetFunctions", con);
+        //        cmd.CommandType = CommandType.StoredProcedure;
+        //        cmd.Parameters.AddWithValue("@Email", details.Email);
+        //        cmd.Parameters.AddWithValue("@PassWord", details.Password);
+        //        //cmd.ExecuteNonQuery();
+
+        //        SqlDataReader reader = cmd.ExecuteReader();
+        //        while (reader.Read())
+        //        {
+        //            Function function = new Function();
+        //            function.Functions = reader["FUN_NAME"].ToString();
+        //            functions.Add(function);
+
+        //        }
+
+        //        return Ok(functions);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine(e);
+        //        return BadRequest("SomeThing Wrong Please Try Again");
+        //    }
+        //    finally
+        //    {
+        //        con.Close();
+        //    }
+
+        //}
         [HttpPost]
         [Route("TimeSheet_Login")]
         public IActionResult Login(LoginDetails details)
@@ -27,46 +67,56 @@ namespace TimeSheet_Project.Controllers
             List<Function> functions = new List<Function>();
             SqlConnection con = new SqlConnection(_connection);
             con.Open();
+
             try
             {
-
+                // Execute the stored procedure to validate user
                 SqlCommand cmd = new SqlCommand("SP_GetFunctions", con);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@Email", details.Email);
                 cmd.Parameters.AddWithValue("@PassWord", details.Password);
-                //cmd.ExecuteNonQuery();
 
                 SqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
+
+                // If user is valid, proceed with fetching functions
+                if (reader.HasRows)
                 {
-                    Function function = new Function();
-                    function.Functions = reader["FUN_NAME"].ToString();
-                    functions.Add(function);
+                    while (reader.Read())
+                    {
+                        Function function = new Function();
+                        function.Functions = reader["FUN_NAME"].ToString();
+                        functions.Add(function);
+                    }
 
+                    // Generate a session ID
+                    var sessionId = Guid.NewGuid().ToString();
+
+                    // Store the session ID in cache (with an expiration of 1 hour)
+                    _cache.Set(sessionId, details.Email, TimeSpan.FromHours(1));
+
+                    // Return the session ID along with functions
+                    return Ok(new { SessionId = sessionId, Functions = functions });
                 }
-
-                return Ok(functions);
+                else
+                {
+                    return Unauthorized("Invalid credentials");
+                }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e);
-                return BadRequest("SomeThing Wrong Please Try Again");
+                // Handle error and log exception if needed
+                return StatusCode(500, "An error occurred: " + ex.Message);
             }
             finally
             {
                 con.Close();
             }
-            //var result=  _tBL_EMPLOYEE.Login(details);
-            //if (result != null)
-            //{
-            //    return Ok(result);
-            //}
-
-            //else
-            //{
-            //    return BadRequest("Something Wrong Please Try Again ");
-            //}
         }
+
+
+
+
+
         [HttpPost]
         [Route("Get_Projects")]
         public IActionResult GetAllProjects()
