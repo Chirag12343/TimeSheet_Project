@@ -59,19 +59,18 @@ namespace TimeSheet_Project.Controllers
             while (read.Read())
             {
                 TimeSheet timesheet = new TimeSheet();
-                DateTime dbDate = read.GetDateTime(1);
-                timesheet.TIMESHEET_DATE = DateOnly.FromDateTime(dbDate);
-                timesheet.EMP_NAME = read.GetString(2);
-                timesheet.TIMESLOT = read.GetString(3);
-                timesheet.HOURS = read.GetInt32(4);
-                timesheet.PROJ_NAME = read.GetString(5);
-                timesheet.FUN_NAME = read.GetString(6);
-                timesheet.MOD_NAME = read.GetString(7);
-                timesheet.TIME_FROM = read.GetString(8);
-                timesheet.TIME_TO = read.GetString(9);
-                timesheet.TIMESHEET_DESC = read.GetString(10);
-                timesheet.CREATED_BY = read.GetString(11);
-                timesheet.CREATED_DATE = read.GetDateTime(12);
+                timesheet.TIMESHEET_DATE = read.GetDateTime(0);
+                timesheet.EMP_NAME = read.GetString(1);
+                timesheet.TIMESLOT = read.GetString(2);
+                timesheet.HOURS = read.GetInt32(3);
+                timesheet.PROJ_NAME = read.GetString(4);
+                timesheet.FUN_NAME = read.GetString(5);
+                timesheet.MOD_NAME = read.GetString(6);
+                timesheet.TIME_FROM = read.GetString(7);
+                timesheet.TIME_TO = read.GetString(8); 
+                timesheet.TIMESHEET_DESC = read.IsDBNull(9) ? null : read.GetString(9);
+                timesheet.CREATED_BY = read.IsDBNull(10) ? null : read.GetString(10);
+                timesheet.CREATED_DATE = read.IsDBNull(11) ? (DateTime?)null : read.GetDateTime(11);
                 Timesheets.Add(timesheet);
             }
             conn.Close();

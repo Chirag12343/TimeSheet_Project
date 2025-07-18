@@ -167,7 +167,52 @@ namespace TimeSheet_Project.Controllers
             return Ok(getAllModules);
 
         }
+        [HttpPost]
+        [Route("Insert_daily_timesheet")]
+        public IActionResult UploadTimeSheetDetails(TIMESHEETDETAILS DETAILS)
+        {
+            SqlConnection conn = new SqlConnection(_connection);
+            conn.Open();
+            try
+            {
+                DateTime date = DateTime.Now;
 
-       
+                if (DateTime.Now > date)
+                { 
+                  
+                }
+                
+                SqlCommand cmd = new SqlCommand("SP_InsertDailySheet", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@TIMESHEET_DATE", DateTime.Now.Date);
+                cmd.Parameters.AddWithValue("@EMP_ID", DETAILS.EMP_ID);
+                cmd.Parameters.AddWithValue("@SLOT_ID", DETAILS.SLOT_ID);
+                cmd.Parameters.AddWithValue("@HOURSE", DETAILS.HOURS);
+                cmd.Parameters.AddWithValue("@PROJ_ID", DETAILS.PROJ_ID);
+                cmd.Parameters.AddWithValue("@FUN_ID", DETAILS.FUN_ID);
+                cmd.Parameters.AddWithValue("@MOD_ID", DETAILS.MOD_ID);
+                cmd.Parameters.AddWithValue("@TIME_FROM", DETAILS.TIME_FROM);
+                cmd.Parameters.AddWithValue("@TIME_TO", DETAILS.TIME_TO);
+                cmd.Parameters.AddWithValue("@TIMESHEET_DESC", DETAILS.TIMESHEET_DESC);
+                cmd.Parameters.AddWithValue("@CREATED_BY", DETAILS.CREATED_BY);
+                cmd.Parameters.AddWithValue("@CREATED_DATE", DateTime.Now.Date);
+
+                cmd.ExecuteNonQuery();
+                return Ok();
+
+            }
+            catch (Exception E)
+            {
+                Console.WriteLine(E.Message);
+                return BadRequest(E.Message);
+            }
+
+            finally
+            { conn.Close(); }
+            ;
+
+        }
+
+
     }
 }
