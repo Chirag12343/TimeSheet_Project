@@ -2,7 +2,7 @@
 {
     public class Specific_employeeDetails
     {
-        public DateTime TaskDate { get; set; }
+        
         public string TaskTimeSlot { get; set; }
         public int TaskHours { get; set; }
         public string taskProject { get; set; }

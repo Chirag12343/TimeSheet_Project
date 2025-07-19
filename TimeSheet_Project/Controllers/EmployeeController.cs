@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Identity.Client;
 using TimeSheet_Project.Models;
 
 namespace TimeSheet_Project.Controllers
@@ -174,44 +175,79 @@ namespace TimeSheet_Project.Controllers
             ;
 
         }
+
+
         [HttpGet]
-        public IActionResult GetEmployeeAllTasks(int employeeId)
+        [Route("Employee-Work-Dates")]
+        public IActionResult GetEmployeeWorkDate(int employeeId)
         {
-            List<Specific_employeeDetails> Employee = new List<Specific_employeeDetails>();
+            List<EmplolyeeWorkDates> EmployeeWorkDates = new List<EmplolyeeWorkDates>();
             SqlConnection conn = new SqlConnection(_connection);
             conn.Open();
             try
             {
-                SqlCommand cmd = new SqlCommand("SP_EmployeeTimeSheetDetails", conn);
+                SqlCommand cmd = new SqlCommand("SP_GETEmployeeWorkDates", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@employeeID", employeeId);
                 SqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
                     DateTime date = Convert.ToDateTime(reader["TIMESHEET_DATE"]);
-                    Specific_employeeDetails EmployeeDetails = new Specific_employeeDetails();
-                    EmployeeDetails.TaskDate =date.Date ;
-                    EmployeeDetails.TaskTimeSlot = reader["TIMESLOT"].ToString();
-                    EmployeeDetails.TaskHours = Convert.ToInt32(reader["HOURS"]);
-                    EmployeeDetails.taskProject = reader["PROJ_NAME"].ToString();
-                    EmployeeDetails.TaskFunction = reader["FUN_NAME"].ToString();
-                    EmployeeDetails.TaskModName = reader["MOD_NAME"].ToString();
-                    EmployeeDetails.TaskTimeFrom = reader["TIME_FROM"].ToString();
-                    EmployeeDetails.TaskTimeTo = reader["TIME_TO"].ToString();
-                    EmployeeDetails.TaskDesc = reader["TIMESHEET_DESC"].ToString();
-                    Employee.Add(EmployeeDetails);
-                    
+                    EmplolyeeWorkDates EmployeeDetails = new EmplolyeeWorkDates();
+                    EmployeeDetails.EmployeeWorkDate = date.Date;
+                   
+                    EmployeeWorkDates.Add(EmployeeDetails);
                 }
-                return Ok(Employee);
+                return Ok(EmployeeWorkDates);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 return BadRequest(e.Message);
             }
-            finally { }
+            finally { conn.Close(); }
 
-}
+        }
+
+        [HttpPost]
+        [Route("GetEmployee_Work_details_by_dateAnd_Id")]
+        public IActionResult GetEmployeeAllTasks(Show_EmployeeDataBasedOnTime_And_Id empDetails)
+        {
+            List<Specific_employeeDetails> EmployeeDataList = new List<Specific_employeeDetails>();
+            SqlConnection conn = new SqlConnection(_connection);
+            conn.Open();
+            try
+            {
+                SqlCommand cmd = new SqlCommand("SP_EmployeeTimeSheetDetails", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@EMPID", empDetails.Emp_ID);
+                cmd.Parameters.AddWithValue("@EMPLOYEEwORKdATE", empDetails.Emp_Work_date);
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    Specific_employeeDetails emp_details=new Specific_employeeDetails();
+                    emp_details.TaskTimeSlot = reader["TIMESLOT"].ToString();
+                    emp_details.TaskHours = Convert.ToInt32(reader["HOURS"]);
+                    emp_details.taskProject = reader["PROJ_NAME"].ToString();
+                    emp_details.TaskFunction = reader["FUN_NAME"].ToString();
+                    emp_details.TaskModName = reader["MOD_NAME"].ToString();
+                    emp_details.TaskTimeFrom = reader["TIME_FROM"].ToString();
+                    emp_details.TaskDesc = reader["TIMESHEET_DESC"].ToString();
+                    emp_details.TaskTimeTo = reader["TIME_TO"].ToString();
+                    EmployeeDataList.Add(emp_details);
+
+                }
+                return Ok(EmployeeDataList);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e.Message);
+            }
+            finally { conn.Close(); }
+
+        }
 
     }
 }
