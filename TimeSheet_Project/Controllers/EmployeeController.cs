@@ -20,46 +20,6 @@ namespace TimeSheet_Project.Controllers
             _cache = cache;
 
         }
-
-
-        //[HttpPost]
-        //[Route("TimeSheet_Login")]
-        //public IActionResult Login(LoginDetails details)
-        //{
-        //    List<Function> functions = new List<Function>();
-        //    SqlConnection con = new SqlConnection(_connection);
-        //    con.Open();
-        //    try
-        //    {
-
-        //        SqlCommand cmd = new SqlCommand("SP_GetFunctions", con);
-        //        cmd.CommandType = CommandType.StoredProcedure;
-        //        cmd.Parameters.AddWithValue("@Email", details.Email);
-        //        cmd.Parameters.AddWithValue("@PassWord", details.Password);
-        //        //cmd.ExecuteNonQuery();
-
-        //        SqlDataReader reader = cmd.ExecuteReader();
-        //        while (reader.Read())
-        //        {
-        //            Function function = new Function();
-        //            function.Functions = reader["FUN_NAME"].ToString();
-        //            functions.Add(function);
-
-        //        }
-
-        //        return Ok(functions);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine(e);
-        //        return BadRequest("SomeThing Wrong Please Try Again");
-        //    }
-        //    finally
-        //    {
-        //        con.Close();
-        //    }
-
-        //}
         [HttpPost]
         [Route("TimeSheet_Login")]
         public IActionResult Login(LoginDetails details)
@@ -176,12 +136,14 @@ namespace TimeSheet_Project.Controllers
             try
             {
                 DateTime date = DateTime.Now;
-
-                if (DateTime.Now > date)
-                { 
-                  
+                DateTime todayAt10AM = DateTime.Today.AddHours(10);
+                DateTime Tomorrow10AM = todayAt10AM.AddDays(1);
+                if (date >= todayAt10AM && date < Tomorrow10AM)
+                {
+                    Console.WriteLine(todayAt10AM);
                 }
-                
+
+
                 SqlCommand cmd = new SqlCommand("SP_InsertDailySheet", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@TIMESHEET_DATE", DateTime.Now.Date);
@@ -198,7 +160,7 @@ namespace TimeSheet_Project.Controllers
                 cmd.Parameters.AddWithValue("@CREATED_DATE", DateTime.Now.Date);
 
                 cmd.ExecuteNonQuery();
-                return Ok();
+                return Ok("Task Added SuccessFully.");
 
             }
             catch (Exception E)
@@ -212,7 +174,44 @@ namespace TimeSheet_Project.Controllers
             ;
 
         }
+        [HttpGet]
+        public IActionResult GetEmployeeAllTasks(int employeeId)
+        {
+            List<Specific_employeeDetails> Employee = new List<Specific_employeeDetails>();
+            SqlConnection conn = new SqlConnection(_connection);
+            conn.Open();
+            try
+            {
+                SqlCommand cmd = new SqlCommand("SP_EmployeeTimeSheetDetails", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@employeeID", employeeId);
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    DateTime date = Convert.ToDateTime(reader["TIMESHEET_DATE"]);
+                    Specific_employeeDetails EmployeeDetails = new Specific_employeeDetails();
+                    EmployeeDetails.TaskDate =date.Date ;
+                    EmployeeDetails.TaskTimeSlot = reader["TIMESLOT"].ToString();
+                    EmployeeDetails.TaskHours = Convert.ToInt32(reader["HOURS"]);
+                    EmployeeDetails.taskProject = reader["PROJ_NAME"].ToString();
+                    EmployeeDetails.TaskFunction = reader["FUN_NAME"].ToString();
+                    EmployeeDetails.TaskModName = reader["MOD_NAME"].ToString();
+                    EmployeeDetails.TaskTimeFrom = reader["TIME_FROM"].ToString();
+                    EmployeeDetails.TaskTimeTo = reader["TIME_TO"].ToString();
+                    EmployeeDetails.TaskDesc = reader["TIMESHEET_DESC"].ToString();
+                    Employee.Add(EmployeeDetails);
+                    
+                }
+                return Ok(Employee);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e.Message);
+            }
+            finally { }
 
+}
 
     }
 }

@@ -125,6 +125,7 @@ namespace TimeSheet_Project.Controllers
                 employee.EMP_CODE = reader["EMP_CODE"].ToString();
                 employee.EMP_NAME = reader["EMP_NAME"].ToString();
                 employee.EMP_MOBILE_NO = Convert.ToInt64(reader["EMP_MOBILE_NO"]);
+                employee.EMP_EMAIL_ID = reader["EMP_EMAIL_ID"].ToString();
                 employee.EMP_PASSWORD = reader["EMP_PASSWORD"].ToString();
                 employee.CREATED_BY = reader["CREATED_BY"].ToString();
                 employee.CREATED_DATE = Convert.ToDateTime(reader["CREATED_DATE"]);
@@ -647,7 +648,7 @@ namespace TimeSheet_Project.Controllers
             }
         }
         [HttpDelete]
-        [Route("DeleteEmployee")]
+        [Route("DeleteEmployee/{EmployeeID}")]
         public IActionResult DeleteEmployee(int EmployeeID)
         {
             SqlConnection conn = new SqlConnection(connection);
@@ -658,7 +659,7 @@ namespace TimeSheet_Project.Controllers
                 sqlCommand.CommandType = CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("@EMP_ID",EmployeeID);
                 sqlCommand.ExecuteNonQuery();
-                return Ok("Employee Deleted SuccessFully.");
+                return Ok(new { success = true, message = "Employee deleted" });
             }
             catch (Exception e)
             {
