@@ -286,7 +286,7 @@ namespace TimeSheet_Project.Controllers
                 function.MOD_ID = Convert.ToInt32(reader["MOD_ID"]);
                 function.FUN_NAME = reader["FUN_NAME"].ToString();
                 function.MOD_NAME = reader["MOD_NAME"].ToString();
-                // project.PROJ_DESC = reader["PROJ_DESC"].ToString();
+                function.MOD_CODE = reader["MOD_CODE"].ToString();
                 function.CREATED_BY = reader["CREATED_BY"].ToString();
                 function.CREATED_DATE = Convert.ToDateTime(reader["CREATED_DATE"]);
 
@@ -727,8 +727,8 @@ namespace TimeSheet_Project.Controllers
 
 
         [HttpDelete]
-        [Route("DeleteRole")]
-        public IActionResult DeleteRole(int role_id)
+        [Route("DeleteRole/{RoleId}")]
+        public IActionResult DeleteRole(int RoleId)
         {
           SqlConnection conn=new SqlConnection(connection);
             conn.Open();
@@ -736,7 +736,7 @@ namespace TimeSheet_Project.Controllers
             {
                 SqlCommand sqlCommand = new SqlCommand("SP_DeleteRole", conn);
                 sqlCommand.CommandType = CommandType.StoredProcedure;
-                sqlCommand.Parameters.AddWithValue("@ROLE_ID", role_id);
+                sqlCommand.Parameters.AddWithValue("@ROLE_ID", RoleId);
                 sqlCommand.ExecuteNonQuery();    
                 return Ok("Role Deleted SuccessFully.");
             }
@@ -772,7 +772,7 @@ namespace TimeSheet_Project.Controllers
 
 
         [HttpDelete]
-        [Route("DeleteClient")]
+        [Route("DeleteClient/{ClientId}")]
         public IActionResult DeleteClient(int ClientId)
         {
             SqlConnection conn = new SqlConnection(connection);
@@ -795,7 +795,7 @@ namespace TimeSheet_Project.Controllers
 
 
         [HttpDelete]
-        [Route("DeleteProject")]
+        [Route("DeleteProject/{ProjectId}")]
         public IActionResult DeleteProject(int ProjectId)
         {
             SqlConnection conn = new SqlConnection(connection);
@@ -818,7 +818,7 @@ namespace TimeSheet_Project.Controllers
 
 
         [HttpDelete]
-        [Route("DeleteFunction")]
+        [Route("DeleteFunction/{FunctionId}")]
         public IActionResult DeleteFunction(int FunctionId)
         {
             SqlConnection conn = new SqlConnection(connection);
@@ -841,7 +841,7 @@ namespace TimeSheet_Project.Controllers
 
 
         [HttpDelete]
-        [Route("DeleteModule")]
+        [Route("DeleteModule/{ModuleId}")]
         public IActionResult DeleteModule(int ModuleId)
         {
             SqlConnection conn = new SqlConnection(connection);
@@ -861,6 +861,7 @@ namespace TimeSheet_Project.Controllers
             }
 
         }
+
 
 
         [HttpGet]
