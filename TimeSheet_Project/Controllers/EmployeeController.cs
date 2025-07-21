@@ -256,6 +256,32 @@ namespace TimeSheet_Project.Controllers
             finally { conn.Close(); }
 
         }
+        [HttpGet]
+        [Route("GetMinutes")]
+        public IActionResult getMin(get_min_basedON_slot DETAILS)
+        {
 
+            SqlConnection conn = new SqlConnection(_connection);
+            SqlCommand cmd = new SqlCommand("sp_DEMOPROC",conn);
+            List<RemainMinutes> minutes = new List<RemainMinutes>();
+            conn.Open();
+           
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@TIME", DETAILS.slotDate);
+                cmd.Parameters.AddWithValue("@EMP_ID", DETAILS.EMP_ID);
+                cmd.Parameters.AddWithValue("@SLOT", DETAILS.SLOT_ID);
+                int result = Convert.ToInt32(cmd.ExecuteScalar());
+                for (int i = result; i <= 60; i++)
+                {
+                    RemainMinutes minute = new RemainMinutes();
+                    minute.Min = i;
+                    minutes.Add(minute);
+                }
+            conn.Close();
+                return Ok(minutes);
+            
+           
+       
+        }
     }
 }
