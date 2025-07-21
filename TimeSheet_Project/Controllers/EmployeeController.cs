@@ -160,14 +160,14 @@ namespace TimeSheet_Project.Controllers
                 cmd.Parameters.AddWithValue("@CREATED_BY", DETAILS.CREATED_BY);
 
                 //cmd.ExecuteNonQuery();
-                int RESULT = Convert.ToInt32(cmd.ExecuteScalar());
-                if (RESULT==1)
+                int result = Convert.ToInt32(cmd.ExecuteScalar());
+                if (result == 1)
                 {
-                    return Ok("Task Added SuccessFully.");
+                    return Ok(new { message = "Task Added SuccessFully." });
                 }
                 else 
                 {
-                      return BadRequest("The time slot for this date has already been used. Please choose a different time slot.");
+                      return BadRequest(new {message= "The time slot for this date has already been used. Please choose a different time slot." });
                 }
                    
 
