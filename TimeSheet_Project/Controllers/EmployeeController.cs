@@ -158,10 +158,18 @@ namespace TimeSheet_Project.Controllers
                 cmd.Parameters.AddWithValue("@TIME_TO", DETAILS.TIME_TO);
                 cmd.Parameters.AddWithValue("@TIMESHEET_DESC", DETAILS.TIMESHEET_DESC);
                 cmd.Parameters.AddWithValue("@CREATED_BY", DETAILS.CREATED_BY);
-                cmd.Parameters.AddWithValue("@CREATED_DATE", DateTime.Now.Date);
 
-                cmd.ExecuteNonQuery();
-                return Ok("Task Added SuccessFully.");
+                //cmd.ExecuteNonQuery();
+                int RESULT = Convert.ToInt32(cmd.ExecuteScalar());
+                if (RESULT==1)
+                {
+                    return Ok("Task Added SuccessFully.");
+                }
+                else 
+                {
+                      return BadRequest("The time slot for this date has already been used. Please choose a different time slot.");
+                }
+                   
 
             }
             catch (Exception E)
