@@ -11,6 +11,13 @@
         public DateTime? UPDATED_DATE { get; set; }
         public byte IS_ACTIVE { get; set; }
 
+    }
 
+    public class UpdateClient
+    {
+        public int CLIENT_ID { get; set; }
+        public string CLIENT_CODE { get; set; }
+        public string CLIENT_NAME { get; set; }
+        public DateTime? UPDATED_DATE { get; set; }
     }
 }

@@ -16,6 +16,8 @@ namespace TimeSheet_Project.Controllers
         {
             connection = config.GetConnectionString("conn");
         }
+
+
         //[HttpGet]
         //[Route("Get_all_TimeSheet")]
         //public IActionResult GetAll_TimeSheet()
@@ -46,6 +48,8 @@ namespace TimeSheet_Project.Controllers
 
         //    return Ok(Timesheets);
         //}
+
+
         [HttpGet]
         [Route("Get_all_TimeSheet")]
         public IActionResult GetAll_TimeSheet()
@@ -59,23 +63,26 @@ namespace TimeSheet_Project.Controllers
             while (read.Read())
             {
                 TimeSheet timesheet = new TimeSheet();
-                timesheet.TIMESHEET_DATE = read.GetDateTime(0);
-                timesheet.EMP_NAME = read.GetString(1);
-                timesheet.TIMESLOT = read.GetString(2);
-                timesheet.HOURS = read.GetInt32(3);
-                timesheet.PROJ_NAME = read.GetString(4);
-                timesheet.FUN_NAME = read.GetString(5);
-                timesheet.MOD_NAME = read.GetString(6);
-                timesheet.TIME_FROM = read.GetString(7);
-                timesheet.TIME_TO = read.GetString(8); 
-                timesheet.TIMESHEET_DESC = read.IsDBNull(9) ? null : read.GetString(9);
-                timesheet.CREATED_BY = read.IsDBNull(10) ? null : read.GetString(10);
-                timesheet.CREATED_DATE = read.IsDBNull(11) ? (DateTime?)null : read.GetDateTime(11);
+                DateTime dbDate = read.GetDateTime(1);
+                timesheet.TIMESHEET_DATE = DateOnly.FromDateTime(dbDate);
+                timesheet.EMP_NAME = read.GetString(2);
+                timesheet.TIMESLOT = read.GetString(3);
+                timesheet.HOURS = read.GetInt32(4);
+                timesheet.PROJ_NAME = read.GetString(5);
+                timesheet.FUN_NAME = read.GetString(6);
+                timesheet.MOD_NAME = read.GetString(7);
+                timesheet.TIME_FROM = read.GetString(8);
+                timesheet.TIME_TO = read.GetString(9);
+                timesheet.TIMESHEET_DESC = read.GetString(10);
+                timesheet.CREATED_BY = read.GetString(11);
+                timesheet.CREATED_DATE = read.GetDateTime(12);
                 Timesheets.Add(timesheet);
             }
             conn.Close();
             return Ok(Timesheets);
         }
+
+
         [HttpGet]
         [Route("GET_ALL_ROLES")]
         public IActionResult ShowROles()
@@ -107,6 +114,8 @@ namespace TimeSheet_Project.Controllers
             }
             return Ok(roles);
         }
+
+
         [HttpGet]
         [Route("GET_ALL_EMPLOYEE")]
         public IActionResult ShowEmployees()
@@ -124,8 +133,8 @@ namespace TimeSheet_Project.Controllers
                 employee.ROLE_NAME = reader["ROLE_NAME"].ToString();
                 employee.EMP_CODE = reader["EMP_CODE"].ToString();
                 employee.EMP_NAME = reader["EMP_NAME"].ToString();
-                employee.EMP_MOBILE_NO = Convert.ToInt64(reader["EMP_MOBILE_NO"]);
                 employee.EMP_EMAIL_ID = reader["EMP_EMAIL_ID"].ToString();
+                employee.EMP_MOBILE_NO = Convert.ToInt64(reader["EMP_MOBILE_NO"]);
                 employee.EMP_PASSWORD = reader["EMP_PASSWORD"].ToString();
                 employee.CREATED_BY = reader["CREATED_BY"].ToString();
                 employee.CREATED_DATE = Convert.ToDateTime(reader["CREATED_DATE"]);
@@ -155,6 +164,8 @@ namespace TimeSheet_Project.Controllers
             con.Close();
             return Ok(employees);
         }
+
+
         [HttpGet]
         [Route("GET_ALL_CLIENT")]
         public IActionResult ShowClients()
@@ -189,6 +200,7 @@ namespace TimeSheet_Project.Controllers
 
         }
 
+
         [HttpGet]
         [Route("GET_ALL_PROJECTS")]
         public IActionResult ShowProjects()
@@ -222,6 +234,8 @@ namespace TimeSheet_Project.Controllers
             return Ok(projects);
 
         }
+
+
         [HttpGet]
         [Route("GET_ALL_FUNCTIONS")]
         public IActionResult ShowFunctions()
@@ -254,6 +268,8 @@ namespace TimeSheet_Project.Controllers
             }
             return Ok(functions);
         }
+
+
         [HttpGet]
         [Route("GET_ALL_MODULES")]
         public IActionResult ShowModules()
@@ -286,26 +302,53 @@ namespace TimeSheet_Project.Controllers
             return Ok(functions);
         }
 
+
+        [HttpGet]
+        [Route("GET_ALL_TIMESLOT")]
+        public IActionResult getAllTimeslot()
+        {
+            List<TIMESLOTDETAILS> slots = new List<TIMESLOTDETAILS>();
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            SqlCommand cmd = new SqlCommand("SP_GETALLTIMESLOTS", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                TIMESLOTDETAILS timeslot = new TIMESLOTDETAILS();
+                timeslot.SLOT_ID = Convert.ToInt32(reader["SLOT_ID"]);
+                timeslot.TIMESLOT = reader["TIMESLOT"].ToString();
+
+                timeslot.CREATED_BY = reader["CREATED_BY"].ToString();
+                timeslot.UPDATED_DATE = Convert.ToDateTime(reader["CREATED_DATE"]);
+                //role.UPDATED_BY = reader["UPDATED_BY"].ToString();
+                timeslot.UPDATED_BY = reader["UPDATED_BY"] != DBNull.Value
+    ? reader["UPDATED_BY"].ToString(): null;
+                timeslot.UPDATED_DATE = reader["UPDATED_DATE"] != DBNull.Value
+    ? (DateTime?)reader["UPDATED_DATE"]: null;
+                timeslot.IS_ACTIVE = Convert.ToByte(reader["IS_ACTIVE"]);
+
+                slots.Add(timeslot);
+            }
+            return Ok(slots);
+        }
+
         //Update METHODS
         [HttpPut]
         [Route("UPDATE_ROLES")]
-        public IActionResult UpdateRoles(TBL_ROLE role)
+        public IActionResult UpdateRoles(ROLEDETAILS role)
         {
             SqlConnection conn = new SqlConnection(connection);
 
             conn.Open();
             try
             {
-                SqlCommand cmd = new SqlCommand("SP_UpDateRole", conn);
+                SqlCommand cmd = new SqlCommand("SP_UpdateRole", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@ROLE_ID", role.ROLE_ID);
                 cmd.Parameters.AddWithValue("@ROLE_CODE", role.ROLE_CODE);
                 cmd.Parameters.AddWithValue("@ROLE_NAME", role.ROLE_NAME);
-                cmd.Parameters.AddWithValue("@CREATED_BY", role.CREATED_BY);
-                cmd.Parameters.AddWithValue("@CREATED_DATE", role.CREATED_DATE);
-                cmd.Parameters.AddWithValue("@UPDATED_BY", role.UPDATED_BY);
-                cmd.Parameters.AddWithValue("@UPDATED_DATE", role.UPDATED_DATE);
-                cmd.Parameters.AddWithValue("@IS_ACTIVE", role.IS_ACTIVE);
+
                 cmd.ExecuteNonQuery();
                 return Ok("Role Updated Successfully.");
             }
@@ -320,9 +363,10 @@ namespace TimeSheet_Project.Controllers
 
         }
 
+
         [HttpPut]
         [Route("UPDATE_EMPLOYEE")]
-        public IActionResult UpdateEmployee(UpdateEmployee EMPLOYEE)
+        public IActionResult UpdateEmployee(EmployeeUpdate EMPLOYEE)
         {
             using (SqlConnection conn = new SqlConnection(connection))
             {
@@ -337,16 +381,7 @@ namespace TimeSheet_Project.Controllers
                     cmd.Parameters.AddWithValue("@EMP_CODE", EMPLOYEE.EMP_CODE);
                     cmd.Parameters.AddWithValue("@EMP_NAME", EMPLOYEE.EMP_NAME);
                     cmd.Parameters.AddWithValue("@EMP_MOBILE_NO", EMPLOYEE.EMP_MOBILE_NO);
-                    cmd.Parameters.AddWithValue("@EMP_EMAIL_ID", EMPLOYEE.EMP_EMAIL_ID);
-                    cmd.Parameters.AddWithValue("@EMP_PASSWORD", EMPLOYEE.EMP_PASSWORD);
-                    cmd.Parameters.AddWithValue("@CREATED_BY", EMPLOYEE.CREATED_BY);
-                    cmd.Parameters.AddWithValue("@CREATED_DATE", EMPLOYEE.CREATED_DATE);
-                    cmd.Parameters.AddWithValue("@UPDATED_BY", EMPLOYEE.UPDATED_BY);
-                    cmd.Parameters.AddWithValue("@UPDATED_DATE", EMPLOYEE.UPDATED_DATE);
-                    cmd.Parameters.AddWithValue("@IS_ACTIVE", EMPLOYEE.IS_ACTIVE);
-                    cmd.Parameters.AddWithValue("@LINE_MANAGER_ID", EMPLOYEE.LINE_MANAGER_ID);
-                    cmd.Parameters.AddWithValue("@LINE_MANAGER_EMAIL_ID", EMPLOYEE.LINE_MANAGER_EMAIL_ID);
-                    cmd.Parameters.AddWithValue("@EMP_LAST_LOGIN", EMPLOYEE.EMP_LAST_LOGIN);
+                    cmd.Parameters.AddWithValue("@UPDATED_DATE", DateTime.Now);
 
                     cmd.ExecuteNonQuery();
                     return Ok(new { message = "Employee updated successfully" });
@@ -357,9 +392,11 @@ namespace TimeSheet_Project.Controllers
                 }
             }
         }
+
+
         [HttpPut]
         [Route("UPDATE_CLIENT")]
-        public IActionResult UpdateClient(TBL_CLIENT client)
+        public IActionResult UpdateClient(UpdateClient client)
         {
             SqlConnection conn = new SqlConnection(connection);
 
@@ -371,11 +408,7 @@ namespace TimeSheet_Project.Controllers
                 cmd.Parameters.AddWithValue("@CLIENT_ID", client.CLIENT_ID);
                 cmd.Parameters.AddWithValue("@CLIENT_CODE", client.CLIENT_CODE);
                 cmd.Parameters.AddWithValue("@CLIENT_NAME", client.CLIENT_NAME);
-                cmd.Parameters.AddWithValue("@CREATED_BY", client.CREATED_BY);
-                cmd.Parameters.AddWithValue("@CREATED_DATE", client.CREATED_DATE);
-                cmd.Parameters.AddWithValue("@UPDATED_BY", client.UPDATED_BY);
-                cmd.Parameters.AddWithValue("@UPDATED_DATE", client.UPDATED_DATE);
-                cmd.Parameters.AddWithValue("@IS_ACTIVE", client.IS_ACTIVE);
+                cmd.Parameters.AddWithValue("@UPDATED_DATE", DateTime.Now);
                 cmd.ExecuteNonQuery();
                 return Ok("Client Updated Successfully.");
             }
@@ -389,6 +422,8 @@ namespace TimeSheet_Project.Controllers
             }
 
         }
+
+
         [HttpPut]
         [Route("UPDATE_PROJECT")]
         public IActionResult UpdateProject(UpdateProject project)
@@ -408,7 +443,7 @@ namespace TimeSheet_Project.Controllers
                 cmd.Parameters.AddWithValue("@CREATED_BY", project.CREATED_BY);
                 cmd.Parameters.AddWithValue("@CREATED_DATE", project.CREATED_DATE);
                 cmd.Parameters.AddWithValue("@UPDATED_BY", project.UPDATED_BY);
-                cmd.Parameters.AddWithValue("@UPDATED_DATE", project.UPDATED_DATE);
+                cmd.Parameters.AddWithValue("@UPDATED_DATE", DateTime.Now);
                 cmd.Parameters.AddWithValue("@IS_ACTIVE", project.IS_ACTIVE);
                 cmd.ExecuteNonQuery();
 
@@ -420,6 +455,8 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest("Something Wrong Please Try Again..");
             }
         }
+
+
         [HttpPut]
         [Route("UPDATE_FUNCTIONS")]
         public IActionResult UpdateProject(UpdateFunction function)
@@ -435,13 +472,10 @@ namespace TimeSheet_Project.Controllers
                     cmd.Parameters.AddWithValue("@ROLE_ID", function.ROLE_ID);
                     cmd.Parameters.AddWithValue("@FUN_CODE", function.FUN_CODE);
                     cmd.Parameters.AddWithValue("@FUN_NAME", function.FUN_NAME);
-                    cmd.Parameters.AddWithValue("@CREATED_BY", function.CREATED_BY);
-                    cmd.Parameters.AddWithValue("@CREATED_DATE", function.CREATED_DATE);
-                    cmd.Parameters.AddWithValue("@UPDATED_BY", function.UPDATED_BY);
-                    cmd.Parameters.AddWithValue("@UPDATED_DATE", function.UPDATED_DATE);
-                    cmd.Parameters.AddWithValue("@IS_ACTIVE", function.IS_ACTIVE);
+                    cmd.Parameters.AddWithValue("@UPDATED_DATE", DateTime.Now);
+
                     cmd.ExecuteNonQuery();
-                    return Ok("Project Updated Successfully.");
+                    return Ok("Function Updated Successfully.");
                 }
                 catch (Exception E)
                 {
@@ -450,6 +484,7 @@ namespace TimeSheet_Project.Controllers
                 }
             }
         }
+
 
         [HttpPut]
         [Route("UPDATE_MODULES")]
@@ -470,7 +505,7 @@ namespace TimeSheet_Project.Controllers
                     cmd.Parameters.AddWithValue("@CREATED_BY", module.CREATED_BY);
                     cmd.Parameters.AddWithValue("@CREATED_DATE", module.CREATED_DATE);
                     cmd.Parameters.AddWithValue("@UPDATED_BY", module.UPDATED_BY);
-                    cmd.Parameters.AddWithValue("@UPDATED_DATE", module.UPDATED_DATE);
+                    cmd.Parameters.AddWithValue("@UPDATED_DATE", DateTime.Now);
                     cmd.Parameters.AddWithValue("@IS_ACTIVE", module.IS_ACTIVE);
                     cmd.ExecuteNonQuery();
                     return Ok("Module Updated Successfully.");
@@ -482,6 +517,37 @@ namespace TimeSheet_Project.Controllers
                 }
             }
         }
+
+
+        [HttpPut]
+        [Route("UPDATE_TIMESLOT")]
+        public IActionResult UpdateTimeslot(UpdateTimeslot slot )
+        {
+            SqlConnection conn = new SqlConnection(connection);
+
+            conn.Open();
+            try
+            {
+                SqlCommand cmd = new SqlCommand("SP_UPDATETIMESLOT", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SLOT_ID", slot.SLOT_ID);
+                cmd.Parameters.AddWithValue("@TIMESLOT", slot.TIMESLOT);
+ 
+                cmd.ExecuteNonQuery();
+                return Ok(new { message = "Timeslot updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+
+        }
+
+
         [HttpPost]
         [Route("INSERT-ROLE")]
         public IActionResult AddRole(ROLEDETAILS role)
@@ -494,6 +560,7 @@ namespace TimeSheet_Project.Controllers
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@ROLE_CODE", role.ROLE_CODE);
                 cmd.Parameters.AddWithValue("@ROLE_NAME", role.ROLE_NAME);
+                cmd.Parameters.AddWithValue("@UPDATED_DATE", DateTime.Now);
                 cmd.ExecuteNonQuery();
                 return Ok("Role Added Successfully.");
             }
@@ -503,6 +570,30 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+
+        [HttpPost]
+        [Route("INSERT-TIMESLOT")]
+        public IActionResult AddTimeslot(TIMESLOTDETAILS timeslot)
+        {
+            SqlConnection conn = new SqlConnection(connection);
+            conn.Open();
+            try
+            {
+                SqlCommand cmd = new SqlCommand("SP_INSERTTIMESLOTDATA", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@TIMESLOT", timeslot.TIMESLOT);
+                cmd.ExecuteNonQuery();
+                return Ok(new { message = "Timeslot saved" });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e.Message);
+            }
+        }
+
+
         [HttpPost]
         [Route("INSERT-EMPLOYEE")]
         public IActionResult AddEmployee(EmployeeDetailscs employee)
@@ -528,6 +619,8 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+
         [HttpPost]
         [Route("INSERT-CLIENT")]
         public IActionResult AddClient(ClientDetails client)
@@ -538,12 +631,12 @@ namespace TimeSheet_Project.Controllers
             {
                 SqlCommand cmd = new SqlCommand("SP_InsertClient", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@CLIENT_NAME", client.client_code);
-                cmd.Parameters.AddWithValue("@CLIENT_CODE", client.client_name);
+                cmd.Parameters.AddWithValue("@CLIENT_NAME", client.client_name);
+                cmd.Parameters.AddWithValue("@CLIENT_CODE", client.client_code);
                
            
                 cmd.ExecuteNonQuery();
-                return Ok("Client Added Successfully.");
+                return Ok(new { message = "Client Added Successfully." });
             }
             catch (Exception e)
             {
@@ -551,6 +644,7 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest(e.Message);
             }
         }
+
 
         [HttpPost]
         [Route("INSERT-PROJECT")]
@@ -562,14 +656,13 @@ namespace TimeSheet_Project.Controllers
             {
                 SqlCommand cmd = new SqlCommand("SP_InsertProject", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@CLIENT_ID", PROJECT.CLIENT_ID);
-                cmd.Parameters.AddWithValue("@PROJ_CODE", PROJECT.PROJ_CODE);
                 cmd.Parameters.AddWithValue("@PROJ_NAME", PROJECT.PROJ_NAME);
+                cmd.Parameters.AddWithValue("@PROJ_CODE", PROJECT.PROJ_CODE);
                 cmd.Parameters.AddWithValue("@PROJ_DESC", PROJECT.PROJ_DESCRIPTION);
-
+                cmd.Parameters.AddWithValue("@CLIENT_ID", PROJECT.CLIENT_ID);
 
                 cmd.ExecuteNonQuery();
-                return Ok("Project Added Successfully.");
+                return Ok(new { message = "Project Added Successfully." });
             }
             catch (Exception e)
             {
@@ -577,6 +670,8 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+
         [HttpPost]
         [Route("INSERT-FUNCTION")]
         public IActionResult AddFunction(FunctionDetails FUNCTION)
@@ -594,7 +689,7 @@ namespace TimeSheet_Project.Controllers
 
 
                 cmd.ExecuteNonQuery();
-                return Ok("Function Added Successfully.");
+                return Ok(new { message = "Function Added Successfully." });
             }
             catch (Exception e)
             {
@@ -602,6 +697,8 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+
         [HttpPost]
         [Route("INSERT-MODULES")]
         public IActionResult AddModules(ModulesDetails Module)
@@ -627,6 +724,8 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+
         [HttpDelete]
         [Route("DeleteRole")]
         public IActionResult DeleteRole(int role_id)
@@ -647,6 +746,8 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest("SomeThing Wrong Please Try Again..");
             }
         }
+
+
         [HttpDelete]
         [Route("DeleteEmployee/{EmployeeID}")]
         public IActionResult DeleteEmployee(int EmployeeID)
@@ -668,6 +769,8 @@ namespace TimeSheet_Project.Controllers
             }
 
         }
+
+
         [HttpDelete]
         [Route("DeleteClient")]
         public IActionResult DeleteClient(int ClientId)
@@ -690,6 +793,7 @@ namespace TimeSheet_Project.Controllers
 
         }
 
+
         [HttpDelete]
         [Route("DeleteProject")]
         public IActionResult DeleteProject(int ProjectId)
@@ -711,6 +815,8 @@ namespace TimeSheet_Project.Controllers
             }
 
         }
+
+
         [HttpDelete]
         [Route("DeleteFunction")]
         public IActionResult DeleteFunction(int FunctionId)
@@ -732,6 +838,8 @@ namespace TimeSheet_Project.Controllers
             }
 
         }
+
+
         [HttpDelete]
         [Route("DeleteModule")]
         public IActionResult DeleteModule(int ModuleId)
@@ -753,6 +861,8 @@ namespace TimeSheet_Project.Controllers
             }
 
         }
+
+
         [HttpGet]
         [Route("get_roles")]
         public IActionResult GetRoles()
@@ -773,6 +883,8 @@ namespace TimeSheet_Project.Controllers
             }
             return Ok(roles);
         }
+
+
         [HttpGet]
         [Route("get_clients")]
         public IActionResult GetClients()
@@ -793,6 +905,8 @@ namespace TimeSheet_Project.Controllers
             }
             return Ok(CLIENTS);
         }
+
+
         //[HttpGet]
         //[Route("get_roles")]
         //public IActionResult GetallRoles()
