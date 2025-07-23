@@ -1,4 +1,8 @@
+using System.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Caching.Memory;
+using TimeSheet_Project.Models;
 
 namespace TimeSheet_Project.Controllers;
 
@@ -10,12 +14,13 @@ public class WeatherForecastController : ControllerBase
     {
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     };
-
+    
     private readonly ILogger<WeatherForecastController> _logger;
 
     public WeatherForecastController(ILogger<WeatherForecastController> logger)
     {
         _logger = logger;
+        
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
@@ -29,4 +34,6 @@ public class WeatherForecastController : ControllerBase
         })
         .ToArray();
     }
+
+   
 }

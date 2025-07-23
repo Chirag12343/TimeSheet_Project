@@ -63,19 +63,19 @@ namespace TimeSheet_Project.Controllers
             while (read.Read())
             {
                 TimeSheet timesheet = new TimeSheet();
-                DateTime dbDate = read.GetDateTime(1);
-                timesheet.TIMESHEET_DATE = DateOnly.FromDateTime(dbDate);
-                timesheet.EMP_NAME = read.GetString(2);
-                timesheet.TIMESLOT = read.GetString(3);
-                timesheet.HOURS = read.GetInt32(4);
-                timesheet.PROJ_NAME = read.GetString(5);
-                timesheet.FUN_NAME = read.GetString(6);
-                timesheet.MOD_NAME = read.GetString(7);
-                timesheet.TIME_FROM = read.GetString(8);
-                timesheet.TIME_TO = read.GetString(9);
-                timesheet.TIMESHEET_DESC = read.GetString(10);
-                timesheet.CREATED_BY = read.GetString(11);
-                timesheet.CREATED_DATE = read.GetDateTime(12);
+                timesheet.TIMESHEET_DATE = read.GetDateTime(0);
+           
+                timesheet.EMP_NAME = read.GetString(1);
+                timesheet.TIMESLOT = read.GetString(2);
+                timesheet.HOURS = read.GetInt32(3);
+                timesheet.PROJ_NAME = read.GetString(4);
+                timesheet.FUN_NAME = read.GetString(5);
+                timesheet.MOD_NAME = read.GetString(6);
+                timesheet.TIME_FROM = read.GetString(7);
+                timesheet.TIME_TO = read.GetString(8);
+                timesheet.TIMESHEET_DESC = read.GetString(9);
+                timesheet.CREATED_BY = read.GetString(10);
+                timesheet.CREATED_DATE = read.GetDateTime(11);
                 Timesheets.Add(timesheet);
             }
             conn.Close();
@@ -323,9 +323,9 @@ namespace TimeSheet_Project.Controllers
                 timeslot.UPDATED_DATE = Convert.ToDateTime(reader["CREATED_DATE"]);
                 //role.UPDATED_BY = reader["UPDATED_BY"].ToString();
                 timeslot.UPDATED_BY = reader["UPDATED_BY"] != DBNull.Value
-    ? reader["UPDATED_BY"].ToString(): null;
+    ? reader["UPDATED_BY"].ToString() : null;
                 timeslot.UPDATED_DATE = reader["UPDATED_DATE"] != DBNull.Value
-    ? (DateTime?)reader["UPDATED_DATE"]: null;
+    ? (DateTime?)reader["UPDATED_DATE"] : null;
                 timeslot.IS_ACTIVE = Convert.ToByte(reader["IS_ACTIVE"]);
 
                 slots.Add(timeslot);
@@ -501,7 +501,7 @@ namespace TimeSheet_Project.Controllers
                     cmd.Parameters.AddWithValue("@MOD_ID", module.MOD_ID);
                     cmd.Parameters.AddWithValue("@FUN_ID", module.FUN_ID);
                     cmd.Parameters.AddWithValue("@MOD_CODE", module.MOD_CODE);
-                   // cmd.Parameters.AddWithValue("@MOD_NAME", module.FUN_NAME);
+                    // cmd.Parameters.AddWithValue("@MOD_NAME", module.FUN_NAME);
                     cmd.Parameters.AddWithValue("@CREATED_BY", module.CREATED_BY);
                     cmd.Parameters.AddWithValue("@CREATED_DATE", module.CREATED_DATE);
                     cmd.Parameters.AddWithValue("@UPDATED_BY", module.UPDATED_BY);
@@ -521,7 +521,7 @@ namespace TimeSheet_Project.Controllers
 
         [HttpPut]
         [Route("UPDATE_TIMESLOT")]
-        public IActionResult UpdateTimeslot(UpdateTimeslot slot )
+        public IActionResult UpdateTimeslot(UpdateTimeslot slot)
         {
             SqlConnection conn = new SqlConnection(connection);
 
@@ -532,7 +532,7 @@ namespace TimeSheet_Project.Controllers
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@SLOT_ID", slot.SLOT_ID);
                 cmd.Parameters.AddWithValue("@TIMESLOT", slot.TIMESLOT);
- 
+
                 cmd.ExecuteNonQuery();
                 return Ok(new { message = "Timeslot updated successfully" });
             }
@@ -554,7 +554,7 @@ namespace TimeSheet_Project.Controllers
         {
             SqlConnection conn = new SqlConnection(connection);
             conn.Open();
-            try 
+            try
             {
                 SqlCommand cmd = new SqlCommand("SP_INSERTROLE", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -633,8 +633,8 @@ namespace TimeSheet_Project.Controllers
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@CLIENT_NAME", client.client_name);
                 cmd.Parameters.AddWithValue("@CLIENT_CODE", client.client_code);
-               
-           
+
+
                 cmd.ExecuteNonQuery();
                 return Ok(new { message = "Client Added Successfully." });
             }
@@ -685,7 +685,7 @@ namespace TimeSheet_Project.Controllers
                 cmd.Parameters.AddWithValue("@ROLE_ID", FUNCTION.ROLE_ID);
                 cmd.Parameters.AddWithValue("@FUN_CODE", FUNCTION.FUN_CODE);
                 cmd.Parameters.AddWithValue("@FUN_NAME", FUNCTION.FUN_NAME);
-            
+
 
 
                 cmd.ExecuteNonQuery();
@@ -730,14 +730,14 @@ namespace TimeSheet_Project.Controllers
         [Route("DeleteRole/{RoleId}")]
         public IActionResult DeleteRole(int RoleId)
         {
-          SqlConnection conn=new SqlConnection(connection);
+            SqlConnection conn = new SqlConnection(connection);
             conn.Open();
             try
             {
                 SqlCommand sqlCommand = new SqlCommand("SP_DeleteRole", conn);
                 sqlCommand.CommandType = CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("@ROLE_ID", RoleId);
-                sqlCommand.ExecuteNonQuery();    
+                sqlCommand.ExecuteNonQuery();
                 return Ok("Role Deleted SuccessFully.");
             }
             catch (Exception e)
@@ -758,7 +758,7 @@ namespace TimeSheet_Project.Controllers
             {
                 SqlCommand sqlCommand = new SqlCommand("SP_DeleteEmployee", conn);
                 sqlCommand.CommandType = CommandType.StoredProcedure;
-                sqlCommand.Parameters.AddWithValue("@EMP_ID",EmployeeID);
+                sqlCommand.Parameters.AddWithValue("@EMP_ID", EmployeeID);
                 sqlCommand.ExecuteNonQuery();
                 return Ok(new { success = true, message = "Employee deleted" });
             }
@@ -868,19 +868,19 @@ namespace TimeSheet_Project.Controllers
         [Route("get_roles")]
         public IActionResult GetRoles()
         {
-            List<GetRoles> roles = new List<GetRoles>();    
+            List<GetRoles> roles = new List<GetRoles>();
             SqlConnection conn = new SqlConnection(connection);
             conn.Open();
             SqlCommand cmd = new SqlCommand("SP_GETROLES", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             SqlDataReader reader = cmd.ExecuteReader();
-            while (reader.Read()) 
+            while (reader.Read())
             {
                 GetRoles role = new GetRoles();
                 role.ROLE_ID = Convert.ToInt32(reader["ROLE_ID"]);
                 role.ROLE_NAME = reader["ROLE_NAME"].ToString();
                 roles.Add(role);
-            
+
             }
             return Ok(roles);
         }
@@ -954,16 +954,16 @@ namespace TimeSheet_Project.Controllers
         [Route("Get_All_SlotDetails")]
         public IActionResult Getallfunctionsall()
         {
-            List< TimeSloatdetails > timesdetails=new List<TimeSloatdetails>();
-            SqlConnection conn = new SqlConnection(connection); 
+            List<TimeSloatdetails> timesdetails = new List<TimeSloatdetails>();
+            SqlConnection conn = new SqlConnection(connection);
             conn.Open();
-            SqlCommand cmd = new SqlCommand("SP_GetSlot",conn);
-           SqlDataReader read= cmd.ExecuteReader();
+            SqlCommand cmd = new SqlCommand("SP_GetSlot", conn);
+            SqlDataReader read = cmd.ExecuteReader();
             while (read.Read())
-            { 
-            TimeSloatdetails slotdata=new TimeSloatdetails();
+            {
+                TimeSloatdetails slotdata = new TimeSloatdetails();
                 slotdata.SLOT_ID = Convert.ToInt32(read["SLOT_ID"]);
-               slotdata.SLOT_NAME=read["TIMESLOT"].ToString();
+                slotdata.SLOT_NAME = read["TIMESLOT"].ToString();
                 timesdetails.Add(slotdata);
             }
             return Ok(timesdetails);

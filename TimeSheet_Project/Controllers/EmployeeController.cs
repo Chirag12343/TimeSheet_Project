@@ -14,7 +14,7 @@ namespace TimeSheet_Project.Controllers
     {
         private readonly IMemoryCache _cache;
         private readonly string _connection;
-        public EmployeeController(IConfiguration config,IMemoryCache cache)
+        public EmployeeController(IConfiguration config, IMemoryCache cache)
         {
 
             _connection = config.GetConnectionString("conn");
@@ -34,7 +34,7 @@ namespace TimeSheet_Project.Controllers
             try
             {
                 // Execute the stored procedure to validate user
-               // SqlCommand cmd = new SqlCommand("SP_GetFunctions", con);
+                // SqlCommand cmd = new SqlCommand("SP_GetFunctions", con);
                 SqlCommand cmd = new SqlCommand("SP_DEMO", con);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@Email", details.Email);
@@ -45,28 +45,28 @@ namespace TimeSheet_Project.Controllers
                 // If user is valid, proceed with fetching functions
                 //if (reader.HasRows)
                 //{
-                    while (reader.Read())
-                    {
-                        Function function = new Function();
+                while (reader.Read())
+                {
+                    Function function = new Function();
 
-                        function.Functions = reader["FUN_NAME"].ToString();
+                    function.Functions = reader["FUN_NAME"].ToString();
                     function.FUN_ID = Convert.ToInt32(reader["FUN_ID"]);
-                     ROLE = reader["ROLE_NAME"].ToString().ToUpper();
+                    ROLE = reader["ROLE_NAME"].ToString().ToUpper();
                     Emp_name = reader["EMP_NAME"].ToString();
                     Emp_Id = Convert.ToInt32(reader["EMP_ID"]);
 
                     functions.Add(function);
-                    }
+                }
 
-             
-                    var sessionId = Guid.NewGuid().ToString();
 
-        
-                    _cache.Set(sessionId, details.Email, TimeSpan.FromHours(1));
+                var sessionId = Guid.NewGuid().ToString();
 
-                    // Return the session ID along with functions
-                    return Ok(new { SessionId = sessionId, Functions = functions ,EMP_ID=Emp_Id,EMP_NAME=Emp_name,EMP_ROLE=ROLE});
-           
+
+                _cache.Set(sessionId, details.Email, TimeSpan.FromHours(1));
+
+                // Return the session ID along with functions
+                return Ok(new { Functions = functions, SessionId = sessionId, EMP_ID = Emp_Id, EMP_NAME = Emp_name, EMP_ROLE = ROLE } );
+
             }
             catch (Exception ex)
             {
@@ -101,25 +101,25 @@ namespace TimeSheet_Project.Controllers
                 project.Client_code = read["CLIENT_CODE"].ToString();
                 project.Proj_name = read["PROJ_NAME"].ToString();
                 projects.Add(project);
-              
+
             }
             conn.Close();
             return Ok(projects);
         }
         [HttpGet]
         [Route("Get-All_Modules")]
-        public IActionResult GetAllModules(string functionname)
-        { 
-          List<GetAllModules> getAllModules = new List<GetAllModules>();
+        public IActionResult GetAllModules(int F_ID)
+        {
+            List<GetAllModules> getAllModules = new List<GetAllModules>();
             SqlConnection conn = new SqlConnection(_connection);
             conn.Open();
             SqlCommand cmd = new SqlCommand("SP_GetAllModulenames", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@Function_Name", functionname);
+            cmd.Parameters.AddWithValue("@FUN_ID",F_ID );
             SqlDataReader read = cmd.ExecuteReader();
-            while (read.Read()) 
+            while (read.Read())
             {
-             GetAllModules module=new GetAllModules();
+                GetAllModules module = new GetAllModules();
                 module.MOD_ID = Convert.ToInt32(read["MOD_ID"]);
                 module.Module = read["MOD_NAME"].ToString();
                 getAllModules.Add(module);
@@ -165,11 +165,11 @@ namespace TimeSheet_Project.Controllers
                 {
                     return Ok(new { message = "Task Added SuccessFully." });
                 }
-                else 
+                else
                 {
-                      return BadRequest(new {message= "The time slot for this date has already been used. Please choose a different time slot." });
+                    return BadRequest(new { message = "The time slot for this date has already been used. Please choose a different time slot." });
                 }
-                   
+
 
             }
             catch (Exception E)
@@ -203,7 +203,7 @@ namespace TimeSheet_Project.Controllers
                     DateTime date = Convert.ToDateTime(reader["TIMESHEET_DATE"]);
                     EmplolyeeWorkDates EmployeeDetails = new EmplolyeeWorkDates();
                     EmployeeDetails.EmployeeWorkDate = date.Date;
-                   
+
                     EmployeeWorkDates.Add(EmployeeDetails);
                 }
                 return Ok(EmployeeWorkDates);
@@ -234,7 +234,7 @@ namespace TimeSheet_Project.Controllers
                 SqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
-                    Specific_employeeDetails emp_details=new Specific_employeeDetails();
+                    Specific_employeeDetails emp_details = new Specific_employeeDetails();
                     emp_details.TaskTimeSlot = reader["TIMESLOT"].ToString();
                     emp_details.TaskHours = Convert.ToInt32(reader["HOURS"]);
                     emp_details.taskProject = reader["PROJ_NAME"].ToString();
@@ -256,32 +256,37 @@ namespace TimeSheet_Project.Controllers
             finally { conn.Close(); }
 
         }
-        [HttpGet]
+        [HttpPost]
         [Route("GetMinutes")]
-        public IActionResult getMin(get_min_basedON_slot DETAILS)
+        public IActionResult getMin([FromBody] get_min_basedON_slot DETAILS)
         {
 
             SqlConnection conn = new SqlConnection(_connection);
-            SqlCommand cmd = new SqlCommand("sp_DEMOPROC",conn);
+            
             List<RemainMinutes> minutes = new List<RemainMinutes>();
             conn.Open();
-           
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@TIME", DETAILS.slotDate);
-                cmd.Parameters.AddWithValue("@EMP_ID", DETAILS.EMP_ID);
-                cmd.Parameters.AddWithValue("@SLOT", DETAILS.SLOT_ID);
-                int result = Convert.ToInt32(cmd.ExecuteScalar());
-                for (int i = result; i <= 60; i++)
-                {
-                    RemainMinutes minute = new RemainMinutes();
-                    minute.Min = i;
-                    minutes.Add(minute);
-                }
+            SqlCommand cmd = new SqlCommand("sp_DEMOPROC", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@TIME",DETAILS.slotDate);
+            cmd.Parameters.AddWithValue("@EMP_ID", DETAILS.EMP_ID);
+            cmd.Parameters.AddWithValue("@SLOT", DETAILS.SLOT_ID);
+            var result = Convert.ToInt32(cmd.ExecuteScalar());
+            //if (result == 0)
+            //{
+            //    result = 0;
+            //}
+            int maxMinutes = Convert.ToInt32(result);
+            for (int i = maxMinutes; i < 60; i++)
+            {
+                RemainMinutes minute = new RemainMinutes();
+                minute.Min = i;
+                minutes.Add(minute);
+            }
             conn.Close();
-                return Ok(minutes);
-            
-           
-       
+            return Ok(minutes);
+
+
+
         }
     }
 }
