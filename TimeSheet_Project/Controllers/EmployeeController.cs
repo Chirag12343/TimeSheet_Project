@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Identity.Client;
+using Newtonsoft.Json;
 using TimeSheet_Project.Models;
 
 namespace TimeSheet_Project.Controllers
@@ -12,14 +13,15 @@ namespace TimeSheet_Project.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
+        private readonly HolidayService _holidayService;
         private readonly IMemoryCache _cache;
         private readonly string _connection;
-        public EmployeeController(IConfiguration config, IMemoryCache cache)
+        public EmployeeController(IConfiguration config, IMemoryCache cache, HolidayService holidayService)
         {
 
             _connection = config.GetConnectionString("conn");
             _cache = cache;
-
+            _holidayService = holidayService;
         }
         [HttpPost]
         [Route("TimeSheet_Login")]
@@ -145,31 +147,43 @@ namespace TimeSheet_Project.Controllers
                 }
 
 
-                SqlCommand cmd = new SqlCommand("SP_InsertDailySheet", conn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@TIMESHEET_DATE", DateTime.Now.Date);
-                cmd.Parameters.AddWithValue("@EMP_ID", DETAILS.EMP_ID);
-                cmd.Parameters.AddWithValue("@SLOT_ID", DETAILS.SLOT_ID);
-                cmd.Parameters.AddWithValue("@HOURSE", DETAILS.HOURS);
-                cmd.Parameters.AddWithValue("@PROJ_ID", DETAILS.PROJ_ID);
-                cmd.Parameters.AddWithValue("@FUN_ID", DETAILS.FUN_ID);
-                cmd.Parameters.AddWithValue("@MOD_ID", DETAILS.MOD_ID);
-                cmd.Parameters.AddWithValue("@TIME_FROM", DETAILS.TIME_FROM);
-                cmd.Parameters.AddWithValue("@TIME_TO", DETAILS.TIME_TO);
-                cmd.Parameters.AddWithValue("@TIMESHEET_DESC", DETAILS.TIMESHEET_DESC);
-                cmd.Parameters.AddWithValue("@CREATED_BY", DETAILS.CREATED_BY);
 
-                //cmd.ExecuteNonQuery();
-                int result = Convert.ToInt32(cmd.ExecuteScalar());
-                if (result == 1)
+                string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Resourses", "Holidays.json");
+                // List<DateTime> holidays = JsonConvert.DeserializeObject<List<DateTime>>(System.IO.File.ReadAllText(filePath));
+                List<DateTime> holidays = JsonConvert.DeserializeObject<List<DateTime>>(System.IO.File.ReadAllText(filePath));
+
+                if (holidays.Contains(todayAt10AM) || todayAt10AM.DayOfWeek == DayOfWeek.Sunday)
                 {
-                    return Ok(new { message = "Task Added SuccessFully." });
+                    return BadRequest(new { message = "Today is a holiday. Timesheet entries are not allowed." });
                 }
                 else
                 {
-                    return BadRequest(new { message = "The time slot for this date has already been used. Please choose a different time slot." });
-                }
 
+                    SqlCommand cmd = new SqlCommand("SP_InsertDailySheet", conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@TIMESHEET_DATE", todayAt10AM);
+                    cmd.Parameters.AddWithValue("@EMP_ID", DETAILS.EMP_ID);
+                    cmd.Parameters.AddWithValue("@SLOT_ID", DETAILS.SLOT_ID);
+                    cmd.Parameters.AddWithValue("@HOURSE", DETAILS.HOURS);
+                    cmd.Parameters.AddWithValue("@PROJ_ID", DETAILS.PROJ_ID);
+                    cmd.Parameters.AddWithValue("@FUN_ID", DETAILS.FUN_ID);
+                    cmd.Parameters.AddWithValue("@MOD_ID", DETAILS.MOD_ID);
+                    cmd.Parameters.AddWithValue("@TIME_FROM", DETAILS.TIME_FROM);
+                    cmd.Parameters.AddWithValue("@TIME_TO", DETAILS.TIME_TO);
+                    cmd.Parameters.AddWithValue("@TIMESHEET_DESC", DETAILS.TIMESHEET_DESC);
+                    cmd.Parameters.AddWithValue("@CREATED_BY", DETAILS.CREATED_BY);
+
+                    //cmd.ExecuteNonQuery();
+                    int result = Convert.ToInt32(cmd.ExecuteScalar());
+                    if (result == 1)
+                    {
+                        return Ok(new { message = "Task Added SuccessFully." });
+                    }
+                    else
+                    {
+                        return BadRequest(new { message = "The time slot for this date has already been used. Please choose a different time slot." });
+                    }
+                }
 
             }
             catch (Exception E)

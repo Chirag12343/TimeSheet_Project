@@ -13,6 +13,7 @@ namespace TimeSheet_Project
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddSingleton<HolidayService>();
             //builder.Services.AddScoped<ITBL_EMPLOYEE, TBL_EMPLOYEE>();
             builder.Services.AddMemoryCache();
 
@@ -37,6 +38,7 @@ namespace TimeSheet_Project
                         .AllowAnyOrigin()
                 );
             });
+           
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
