@@ -36,35 +36,96 @@ namespace TimeSheet_Project.Controllers
 
             // Save date in standard format: yyyy-MM-dd
             if (holidays.Any(h => h.Date == holidayDate.Date))
-                return BadRequest("Holiday already exists.");
+                return BadRequest(new { message= "Holiday already exists." });
 
             holidays.Add(holidayDate.Date);
             System.IO.File.WriteAllText(filePath, JsonConvert.SerializeObject(holidays, Formatting.Indented));
 
-            return Ok("Holiday added successfully.");
+            return Ok(new { message = "Holiday Added successfully." });
         }
 
-       
+
+        //[HttpGet]
+        //[Route("GetAllHolidays")]
+        //public IActionResult GetAllHolimonths()
+        //{
+        //    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Resourses", "Holidays.json");
+
+        //    if (!System.IO.File.Exists(filePath))
+        //        return BadRequest(new {message= "Holiday file not found." });
+
+        //    var json = System.IO.File.ReadAllText(filePath);
+
+        //    try
+        //    {
+        //        var holidays = JsonConvert.DeserializeObject<List<DateTime>>(json);
+        //        //var formattedDates = holidays.Select(d => d.ToString("dd-MM-yyyy")).ToList();
+        //        var formattedDates = holidays;
+        //        return Ok(new {Holidays= formattedDates });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new {message= "Failed to read holidays:  " + ex.Message });
+        //    }
+        //}
+
         [HttpGet]
         [Route("GetAllHolidays")]
-        public IActionResult GetAllHolidays()
+        public IActionResult GetAllMonths()
         {
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Resourses", "Holidays.json");
 
             if (!System.IO.File.Exists(filePath))
-                return BadRequest("Holiday file not found.");
+                return BadRequest(new { message = "Holiday file not found." });
 
             var json = System.IO.File.ReadAllText(filePath);
 
             try
             {
                 var holidays = JsonConvert.DeserializeObject<List<DateTime>>(json);
-                var formattedDates = holidays.Select(d => d.ToString("dd-MM-yyyy")).ToList();
-                return Ok(new {Holidays= formattedDates });
+
+                // Get distinct months (1-12) from holidays
+                var months = holidays
+                    .Select(h => h.ToString("MMMM yyyy")) // Convert DateTime to "Month Year" format
+                    .Distinct()
+                    .ToList();
+
+                return Ok(new { months });
             }
             catch (Exception ex)
             {
-                return BadRequest("Failed to read holidays: " + ex.Message);
+                return BadRequest(new { message = "Failed to read holidays: " + ex.Message });
+            }
+        }
+        [HttpGet]
+        [Route("GetHolidaysByMonth")]
+        public IActionResult GetHolidaysByMonth(string month)
+        {
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Resourses", "Holidays.json");
+
+            if (!System.IO.File.Exists(filePath))
+                return BadRequest(new { message = "Holiday file not found." });
+
+            var json = System.IO.File.ReadAllText(filePath);
+
+            try
+            {
+                var holidays = JsonConvert.DeserializeObject<List<DateTime>>(json);
+
+                // Parse the month string (e.g., "January 2025") into a DateTime object
+                DateTime selectedMonth = DateTime.ParseExact(month, "MMMM yyyy", CultureInfo.InvariantCulture);
+
+                // Filter holidays that belong to the selected month
+                var filteredHolidays = holidays
+                    .Where(h => h.Month == selectedMonth.Month && h.Year == selectedMonth.Year)
+                    .Select(h => h.ToString("MM-dd-yyyy"))
+                    .ToList();
+
+                return Ok(new { holidays = filteredHolidays });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to read holidays: " + ex.Message });
             }
         }
 
@@ -82,23 +143,23 @@ namespace TimeSheet_Project.Controllers
         var json = System.IO.File.ReadAllText(filePath);
         var holidays = JsonConvert.DeserializeObject<List<DateTime>>(json);
 
-        // Try parsing with common formats
-        string[] formats = { "yyyy-MM-dd", "dd-MM-yyyy" };
-        if (!DateTime.TryParseExact(removeDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateToRemove))
-            return BadRequest("Invalid date format. Use yyyy-MM-dd or dd-MM-yyyy.");
+            // Try parsing with common formats
+            string[] formats = { "yyyy-MM-dd", "dd-MM-yyyy" };
+            if (!DateTime.TryParseExact(removeDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateToRemove))
+                return BadRequest("Invalid date format. Use yyyy-MM-dd or dd-MM-yyyy.");
 
-        // Normalize both to Date-only for comparison
-        dateToRemove = dateToRemove.Date;
+            // Normalize both to Date-only for comparison
+            dateToRemove = dateToRemove.Date;
         var matched = holidays.FirstOrDefault(h => h.Date == dateToRemove);
 
         if (matched == default(DateTime))
-            return BadRequest("Date not found in holiday list.");
+            return BadRequest( new { message = "Date not found in holiday list." } );
 
         holidays.Remove(matched);
 
         System.IO.File.WriteAllText(filePath, JsonConvert.SerializeObject(holidays, Formatting.Indented));
 
-        return Ok("Holiday removed successfully.");
+        return Ok(new { message = "Holiday removed successfully." });
     }
 
 
@@ -112,25 +173,7 @@ namespace TimeSheet_Project.Controllers
         }
 
 
-        //[HttpPost]
-        //[Route("AddSaturdayHolidays")]
-        //public IActionResult AddSaturdayHolidays([FromBody] List<int> selectedWeeks)
-        //{
-        //    string basePath = Path.Combine(Directory.GetCurrentDirectory(), "Resourses");
-        //    string filePath = Path.Combine(basePath, "Holidays.json");
-        //    int currentYear = DateTime.Now.Year;
-
-        //    List<DateTime> holidays = System.IO.File.Exists(filePath)
-        //        ? JsonConvert.DeserializeObject<List<DateTime>>(System.IO.File.ReadAllText(filePath))
-        //        : new List<DateTime>();
-
-        //    HolidayHelper.AddSaturdayHolidays(selectedWeeks, holidays, currentYear);
-
-        //    // Save updated holidays list
-        //    System.IO.File.WriteAllText(filePath, JsonConvert.SerializeObject(holidays, Formatting.Indented));
-
-        //    return Ok("Saturday holidays added successfully.");
-        //}
+       
         [HttpPost]
         [Route("AddSaturdayHolidays")]
         public IActionResult AddSaturdayHolidays([FromBody] List<int> selectedWeeks)
@@ -147,7 +190,14 @@ namespace TimeSheet_Project.Controllers
 
             System.IO.File.WriteAllText(filePath, JsonConvert.SerializeObject(holidays, Formatting.Indented));
 
-            return Ok(result);
+            if (result == null)
+            {
+                return BadRequest(new { message = "SomeThing Wrong Please Try Again." });
+            }
+            else
+            {
+                return Ok(new {result= result ,message="Saturday Added Successfully."});
+            }
         }
 
 

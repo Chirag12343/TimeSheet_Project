@@ -109,7 +109,7 @@ namespace TimeSheet_Project.Controllers
             return Ok(projects);
         }
         [HttpGet]
-        [Route("Get-All_Modules")]
+        [Route("Get-All_Modules/{F_ID}")]
         public IActionResult GetAllModules(int F_ID)
         {
             List<GetAllModules> getAllModules = new List<GetAllModules>();
@@ -133,7 +133,7 @@ namespace TimeSheet_Project.Controllers
         [HttpPost]
         [Route("Insert_daily_timesheet")]
         public IActionResult UploadTimeSheetDetails(TIMESHEETDETAILS DETAILS)
-        {
+          {
             SqlConnection conn = new SqlConnection(_connection);
             conn.Open();
             try
@@ -284,20 +284,10 @@ namespace TimeSheet_Project.Controllers
             cmd.Parameters.AddWithValue("@TIME",DETAILS.slotDate);
             cmd.Parameters.AddWithValue("@EMP_ID", DETAILS.EMP_ID);
             cmd.Parameters.AddWithValue("@SLOT", DETAILS.SLOT_ID);
-            var result = Convert.ToInt32(cmd.ExecuteScalar());
-            //if (result == 0)
-            //{
-            //    result = 0;
-            //}
+            var result = Convert.ToInt32(cmd.ExecuteScalar());          
             int maxMinutes = Convert.ToInt32(result);
-            for (int i = maxMinutes; i < 60; i++)
-            {
-                RemainMinutes minute = new RemainMinutes();
-                minute.Min = i;
-                minutes.Add(minute);
-            }
             conn.Close();
-            return Ok(minutes);
+            return Ok(maxMinutes);
 
 
 
