@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Identity.Client;
@@ -18,10 +19,9 @@ namespace TimeSheet_Project.Controllers
         private readonly string _connection;
         public EmployeeController(IConfiguration config, IMemoryCache cache, HolidayService holidayService)
         {
-
             _connection = config.GetConnectionString("conn");
             _cache = cache;
-            _holidayService = holidayService;
+            _holidayService = holidayService;    
         }
         [HttpPost]
         [Route("TimeSheet_Login")]
@@ -35,44 +35,37 @@ namespace TimeSheet_Project.Controllers
             var Emp_Id = 0;
             try
             {
-                // Execute the stored procedure to validate user
-                // SqlCommand cmd = new SqlCommand("SP_GetFunctions", con);
-                SqlCommand cmd = new SqlCommand("SP_DEMO", con);
+                string operation_type = "LOGINEMPLOYEE";
+                SqlCommand cmd = new SqlCommand("SP_EmployeeLogic", con);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@Email", details.Email);
                 cmd.Parameters.AddWithValue("@PassWord", details.Password);
-
+                cmd.Parameters.AddWithValue("@operation_type",operation_type);
                 SqlDataReader reader = cmd.ExecuteReader();
-
-                // If user is valid, proceed with fetching functions
-                //if (reader.HasRows)
-                //{
-                while (reader.Read())
+                if (reader.Read())
                 {
-                    Function function = new Function();
+                    while (reader.Read())
+                    {
+                        Function function = new Function();
+                        function.Functions = reader["FUN_NAME"].ToString();
+                        function.FUN_ID = Convert.ToInt32(reader["FUN_ID"]);
+                        ROLE = reader["ROLE_NAME"].ToString().ToUpper();
+                        Emp_name = reader["EMP_NAME"].ToString();
+                        Emp_Id = Convert.ToInt32(reader["EMP_ID"]);
+                        functions.Add(function);
+                    }
+                    var sessionId = Guid.NewGuid().ToString();
+                    _cache.Set(sessionId, details.Email, TimeSpan.FromHours(1));
 
-                    function.Functions = reader["FUN_NAME"].ToString();
-                    function.FUN_ID = Convert.ToInt32(reader["FUN_ID"]);
-                    ROLE = reader["ROLE_NAME"].ToString().ToUpper();
-                    Emp_name = reader["EMP_NAME"].ToString();
-                    Emp_Id = Convert.ToInt32(reader["EMP_ID"]);
-
-                    functions.Add(function);
+                    return Ok(new { Functions = functions, SessionId = sessionId, EMP_ID = Emp_Id, EMP_NAME = Emp_name, EMP_ROLE = ROLE });
                 }
-
-
-                var sessionId = Guid.NewGuid().ToString();
-
-
-                _cache.Set(sessionId, details.Email, TimeSpan.FromHours(1));
-
-                // Return the session ID along with functions
-                return Ok(new { Functions = functions, SessionId = sessionId, EMP_ID = Emp_Id, EMP_NAME = Emp_name, EMP_ROLE = ROLE } );
-
+                else 
+                {
+                    return BadRequest("User Invalid Please Try again");
+                }       
             }
             catch (Exception ex)
             {
-                // Handle error and log exception if needed
                 Console.WriteLine(ex);
                 return StatusCode(500, "An error occurred: " + ex.Message);
             }
@@ -82,19 +75,17 @@ namespace TimeSheet_Project.Controllers
             }
         }
 
-
-
-
-
         [HttpGet]
         [Route("Get_Projects")]
         public IActionResult GetAllProjects()
         {
+            string operation_type = "ALLPROJECTS";
             List<Projects> projects = new List<Projects>();
             SqlConnection conn = new SqlConnection(_connection);
             conn.Open();
-            SqlCommand cmd = new SqlCommand("SP_GetAllProjectnames", conn);
+            SqlCommand cmd = new SqlCommand("SP_EmployeeLogic", conn);
             cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@operation_type", operation_type);
             SqlDataReader read = cmd.ExecuteReader();
             while (read.Read())
             {
@@ -103,7 +94,6 @@ namespace TimeSheet_Project.Controllers
                 project.Client_code = read["CLIENT_CODE"].ToString();
                 project.Proj_name = read["PROJ_NAME"].ToString();
                 projects.Add(project);
-
             }
             conn.Close();
             return Ok(projects);
@@ -112,11 +102,13 @@ namespace TimeSheet_Project.Controllers
         [Route("Get-All_Modules/{F_ID}")]
         public IActionResult GetAllModules(int F_ID)
         {
+            string operation_type = "GETMODULESBYFUNCTIONS";
             List<GetAllModules> getAllModules = new List<GetAllModules>();
             SqlConnection conn = new SqlConnection(_connection);
             conn.Open();
-            SqlCommand cmd = new SqlCommand("SP_GetAllModulenames", conn);
+            SqlCommand cmd = new SqlCommand("SP_EmployeeLogic", conn);
             cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@operation_type", operation_type);
             cmd.Parameters.AddWithValue("@FUN_ID",F_ID );
             SqlDataReader read = cmd.ExecuteReader();
             while (read.Read())
@@ -128,7 +120,6 @@ namespace TimeSheet_Project.Controllers
             }
             conn.Close();
             return Ok(getAllModules);
-
         }
         [HttpPost]
         [Route("Insert_daily_timesheet")]
@@ -138,6 +129,7 @@ namespace TimeSheet_Project.Controllers
             conn.Open();
             try
             {
+                string operation_type = "INSERTTIMESHEET";
                 DateTime date = DateTime.Now;
                 DateTime todayAt10AM = DateTime.Today.AddHours(10);
                 DateTime Tomorrow10AM = todayAt10AM.AddDays(1);
@@ -145,22 +137,17 @@ namespace TimeSheet_Project.Controllers
                 {
                     Console.WriteLine(todayAt10AM);
                 }
-
-
-
                 string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Resourses", "Holidays.json");
-                // List<DateTime> holidays = JsonConvert.DeserializeObject<List<DateTime>>(System.IO.File.ReadAllText(filePath));
                 List<DateTime> holidays = JsonConvert.DeserializeObject<List<DateTime>>(System.IO.File.ReadAllText(filePath));
-
                 if (holidays.Contains(todayAt10AM) || todayAt10AM.DayOfWeek == DayOfWeek.Sunday)
                 {
                     return BadRequest(new { message = "Today is a holiday. Timesheet entries are not allowed." });
                 }
                 else
                 {
-
-                    SqlCommand cmd = new SqlCommand("SP_InsertDailySheet", conn);
+                    SqlCommand cmd = new SqlCommand("SP_EmployeeLogic", conn);
                     cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@operation_type", operation_type);
                     cmd.Parameters.AddWithValue("@TIMESHEET_DATE", todayAt10AM);
                     cmd.Parameters.AddWithValue("@EMP_ID", DETAILS.EMP_ID);
                     cmd.Parameters.AddWithValue("@SLOT_ID", DETAILS.SLOT_ID);
@@ -172,8 +159,6 @@ namespace TimeSheet_Project.Controllers
                     cmd.Parameters.AddWithValue("@TIME_TO", DETAILS.TIME_TO);
                     cmd.Parameters.AddWithValue("@TIMESHEET_DESC", DETAILS.TIMESHEET_DESC);
                     cmd.Parameters.AddWithValue("@CREATED_BY", DETAILS.CREATED_BY);
-
-                    //cmd.ExecuteNonQuery();
                     int result = Convert.ToInt32(cmd.ExecuteScalar());
                     if (result == 1)
                     {
@@ -184,21 +169,15 @@ namespace TimeSheet_Project.Controllers
                         return BadRequest(new { message = "The time slot for this date has already been used. Please choose a different time slot." });
                     }
                 }
-
             }
             catch (Exception E)
             {
                 Console.WriteLine(E.Message);
                 return BadRequest(E.Message);
             }
-
             finally
-            { conn.Close(); }
-            ;
-
+            { conn.Close(); };
         }
-
-
         [HttpGet]
         [Route("Employee-Work-Dates")]
         public IActionResult GetEmployeeWorkDate(int employeeId)
@@ -208,16 +187,17 @@ namespace TimeSheet_Project.Controllers
             conn.Open();
             try
             {
-                SqlCommand cmd = new SqlCommand("SP_GETEmployeeWorkDates", conn);
+                string operation_type = "GETWORKDATES";
+                SqlCommand cmd = new SqlCommand("SP_EmployeeLogic", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@employeeID", employeeId);
+                cmd.Parameters.AddWithValue("@operation_type", operation_type);
+                cmd.Parameters.AddWithValue("@EMP_ID", employeeId);
                 SqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
                     DateTime date = Convert.ToDateTime(reader["TIMESHEET_DATE"]);
                     EmplolyeeWorkDates EmployeeDetails = new EmplolyeeWorkDates();
                     EmployeeDetails.EmployeeWorkDate = date.Date;
-
                     EmployeeWorkDates.Add(EmployeeDetails);
                 }
                 return Ok(EmployeeWorkDates);
@@ -228,7 +208,6 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest(e.Message);
             }
             finally { conn.Close(); }
-
         }
 
         [HttpPost]
@@ -240,11 +219,12 @@ namespace TimeSheet_Project.Controllers
             conn.Open();
             try
             {
-                SqlCommand cmd = new SqlCommand("SP_EmployeeTimeSheetDetails", conn);
+                string operation_type = "GETWORKSHEETDETAILS";
+                SqlCommand cmd = new SqlCommand("SP_EmployeeLogic", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@EMPID", empDetails.Emp_ID);
-                cmd.Parameters.AddWithValue("@EMPLOYEEwORKdATE", empDetails.Emp_Work_date);
+                cmd.Parameters.AddWithValue("@operation_type", operation_type);
+                cmd.Parameters.AddWithValue("@EMP_ID", empDetails.Emp_ID);
+                cmd.Parameters.AddWithValue("@TIMESHEET_DATE", empDetails.Emp_Work_date);
                 SqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
@@ -258,7 +238,6 @@ namespace TimeSheet_Project.Controllers
                     emp_details.TaskDesc = reader["TIMESHEET_DESC"].ToString();
                     emp_details.TaskTimeTo = reader["TIME_TO"].ToString();
                     EmployeeDataList.Add(emp_details);
-
                 }
                 return Ok(EmployeeDataList);
             }
@@ -268,29 +247,25 @@ namespace TimeSheet_Project.Controllers
                 return BadRequest(e.Message);
             }
             finally { conn.Close(); }
-
         }
         [HttpPost]
         [Route("GetMinutes")]
         public IActionResult getMin([FromBody] get_min_basedON_slot DETAILS)
         {
-
-            SqlConnection conn = new SqlConnection(_connection);
-            
+            string operation_type = "GETMINUTES";
+            SqlConnection conn = new SqlConnection(_connection);          
             List<RemainMinutes> minutes = new List<RemainMinutes>();
             conn.Open();
-            SqlCommand cmd = new SqlCommand("sp_DEMOPROC", conn);
+            SqlCommand cmd = new SqlCommand("SP_EmployeeLogic", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@TIME",DETAILS.slotDate);
+            cmd.Parameters.AddWithValue("@operation_type", operation_type);
+            cmd.Parameters.AddWithValue("@TIMESHEET_DATE", DETAILS.slotDate);
             cmd.Parameters.AddWithValue("@EMP_ID", DETAILS.EMP_ID);
-            cmd.Parameters.AddWithValue("@SLOT", DETAILS.SLOT_ID);
+            cmd.Parameters.AddWithValue("@SLOT_ID", DETAILS.SLOT_ID);
             var result = Convert.ToInt32(cmd.ExecuteScalar());          
             int maxMinutes = Convert.ToInt32(result);
             conn.Close();
             return Ok(maxMinutes);
-
-
-
         }
     }
 }

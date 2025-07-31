@@ -17,6 +17,6 @@
         public string EMP_CODE { get; set; }
         public string EMP_NAME { get; set; }
         public long EMP_MOBILE_NO { get; set; }
-        public DateTime? UPDATED_DATE { get; set; }
+        //public DateTime? UPDATED_DATE { get; set; }
     }
 }

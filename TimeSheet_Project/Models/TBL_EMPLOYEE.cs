@@ -14,8 +14,8 @@ namespace TimeSheet_Project.Models
         public string EMP_PASSWORD { get; set; }
         public string CREATED_BY { get; set; }
         public DateTime CREATED_DATE { get; set; }
-        public string? UPDATED_BY { get; set; }
-        public DateTime? UPDATED_DATE { get; set; }
+        //public string? UPDATED_BY { get; set; }
+        //public DateTime? UPDATED_DATE { get; set; }
         public byte IS_ACTIVE { get; set; }
         public int? LINE_MANAGER_ID { get; set; }
         public string? LINE_MANAGER_EMAIL_ID { get; set; }

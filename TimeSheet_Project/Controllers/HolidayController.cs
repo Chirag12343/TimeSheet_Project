@@ -14,10 +14,6 @@ namespace TimeSheet_Project.Controllers
         [Route("AddHoliday")]
         public IActionResult AddHoliday([FromBody] string newHoliday)
         {
-            //    HolidayHelper.EnsureHolidaysForCurrentYear();
-
-           
-
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Resourses", "Holidays.json");
 
             List<DateTime> holidays = new();
@@ -27,14 +23,14 @@ namespace TimeSheet_Project.Controllers
                 holidays = JsonConvert.DeserializeObject<List<DateTime>>(json);
             }
 
-            // Accept multiple formats: dd-MM-yyyy or yyyy-MM-dd
+        
             DateTime holidayDate;
             string[] acceptedFormats = { "dd-MM-yyyy", "yyyy-MM-dd" };
 
             if (!DateTime.TryParseExact(newHoliday, acceptedFormats, null, System.Globalization.DateTimeStyles.None, out holidayDate))
                 return BadRequest("Invalid date format. Use 'yyyy-MM-dd' or 'dd-MM-yyyy'.");
 
-            // Save date in standard format: yyyy-MM-dd
+        
             if (holidays.Any(h => h.Date == holidayDate.Date))
                 return BadRequest(new { message= "Holiday already exists." });
 
@@ -45,29 +41,6 @@ namespace TimeSheet_Project.Controllers
         }
 
 
-        //[HttpGet]
-        //[Route("GetAllHolidays")]
-        //public IActionResult GetAllHolimonths()
-        //{
-        //    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Resourses", "Holidays.json");
-
-        //    if (!System.IO.File.Exists(filePath))
-        //        return BadRequest(new {message= "Holiday file not found." });
-
-        //    var json = System.IO.File.ReadAllText(filePath);
-
-        //    try
-        //    {
-        //        var holidays = JsonConvert.DeserializeObject<List<DateTime>>(json);
-        //        //var formattedDates = holidays.Select(d => d.ToString("dd-MM-yyyy")).ToList();
-        //        var formattedDates = holidays;
-        //        return Ok(new {Holidays= formattedDates });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new {message= "Failed to read holidays:  " + ex.Message });
-        //    }
-        //}
 
         [HttpGet]
         [Route("GetAllHolidays")]
@@ -84,9 +57,9 @@ namespace TimeSheet_Project.Controllers
             {
                 var holidays = JsonConvert.DeserializeObject<List<DateTime>>(json);
 
-                // Get distinct months (1-12) from holidays
+                
                 var months = holidays
-                    .Select(h => h.ToString("MMMM yyyy")) // Convert DateTime to "Month Year" format
+                    .Select(h => h.ToString("MMMM yyyy")) 
                     .Distinct()
                     .ToList();
 
@@ -112,10 +85,9 @@ namespace TimeSheet_Project.Controllers
             {
                 var holidays = JsonConvert.DeserializeObject<List<DateTime>>(json);
 
-                // Parse the month string (e.g., "January 2025") into a DateTime object
+             
                 DateTime selectedMonth = DateTime.ParseExact(month, "MMMM yyyy", CultureInfo.InvariantCulture);
 
-                // Filter holidays that belong to the selected month
                 var filteredHolidays = holidays
                     .Where(h => h.Month == selectedMonth.Month && h.Year == selectedMonth.Year)
                     .Select(h => h.ToString("MM-dd-yyyy"))
@@ -143,12 +115,10 @@ namespace TimeSheet_Project.Controllers
         var json = System.IO.File.ReadAllText(filePath);
         var holidays = JsonConvert.DeserializeObject<List<DateTime>>(json);
 
-            // Try parsing with common formats
             string[] formats = { "yyyy-MM-dd", "dd-MM-yyyy" };
             if (!DateTime.TryParseExact(removeDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateToRemove))
                 return BadRequest("Invalid date format. Use yyyy-MM-dd or dd-MM-yyyy.");
 
-            // Normalize both to Date-only for comparison
             dateToRemove = dateToRemove.Date;
         var matched = holidays.FirstOrDefault(h => h.Date == dateToRemove);
 

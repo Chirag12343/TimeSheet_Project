@@ -9,7 +9,7 @@ namespace TimeSheet_Project
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            
+          
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -35,12 +35,12 @@ namespace TimeSheet_Project
                         .WithOrigins("http://localhost:4200")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .AllowAnyOrigin()
+                    .AllowCredentials()
                 );
             });
            
             var app = builder.Build();
-
+        
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -59,6 +59,7 @@ namespace TimeSheet_Project
             app.UseSession();
             app.UseCors("AllowAngularClient");
             app.MapControllers();
+          
 
             app.Run();
         }
