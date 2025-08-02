@@ -7,7 +7,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using TimeSheet_Project.Models;
-
 namespace TimeSheet_Project.Controllers
 {
     [Route("api/[controller]")]
